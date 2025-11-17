@@ -8,7 +8,7 @@ function logo_base64_data(path)
     return data
 end
 #Crookerijen
-# test site update
+# test site update 2
 
 function background_base64_data(path)
     img = load(path)
@@ -2338,4 +2338,5 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
