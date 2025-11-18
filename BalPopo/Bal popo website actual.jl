@@ -1132,7 +1132,7 @@ route("/") do
                 <a href="https://www.facebook.com/YourPage" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
                 </a>
-                <a href="https://www.instagram.com/YourPage" target="_blank">
+                <a href="https://www.instagram.com/ballpolytechnic177/" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-instagram-96.png"))" alt="Instagram">
                 </a>
             </div>
@@ -2337,6 +2337,7 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
 
 
