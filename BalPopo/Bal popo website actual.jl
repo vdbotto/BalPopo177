@@ -23,7 +23,7 @@ end
 function create_long_background(path; repetitions)
     img = load(path)
     stacked = img
-    for i in 2:repetitions
+    for i in 2:
         part = (i % 2 == 0) ? reverse(img, dims=1) : img  # Flip vertically every second image
         stacked = vcat(stacked, part)                     # Stack vertically
     end
@@ -81,7 +81,7 @@ function layout(title, content; background_css = "")
   </script>
   """
   banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
-  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=20)
+  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=40)
 
 
 
@@ -2337,6 +2337,7 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
 
 
