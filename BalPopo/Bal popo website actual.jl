@@ -303,7 +303,7 @@ function layout(title, content; background_css = "")
           <nav class="mobile-menu">
             <div class="close-btn" onclick="toggleMenu()">✖</div>
             <a href="/">Home</a>
-            <a href="/sponsors">Sponsorssss</a>
+            <a href="/sponsors">Sponsors</a>
             <a href="/Registration">Registration</a>
             <a href="/theevent">The Event</a>
             <a href="/ourstory">Our Story</a>
@@ -2338,6 +2338,7 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
 
 
