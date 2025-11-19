@@ -948,7 +948,7 @@ route("/Registration", method = GET) do
 
     <!-- CALENDAR -->
     <div>
-      <label for="calendarPurchase">Would you like to purchase our "special 2026 prom calendar"? </label>
+      <label for="calendarPurchase">Would you like to purchase our "special 2026 prom calendar"? ⓘ </label>
       <select id="calendarPurchase" name="calendarPurchase" required>
         <option value="">-- Select --</option>
         <option value="Yes">Yes (€$calendar_price)</option>
