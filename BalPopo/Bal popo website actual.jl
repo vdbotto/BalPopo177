@@ -1243,54 +1243,48 @@ route("/sponsors") do
   data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
   data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
   data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
+
   content = """
   <div class="content">
     <div class="sponsor-header">
       <h1>Our sponsors</h1>
-      <p>Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:</p>
+      <p>
+        Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:
+      </p>
     </div>
 
     <div class="sponsor-section">
       <h2 style="color:gold">Gold</h2>
-      <div class="sponsor-tier sponsor_card">
+      <div class="sponsor-cards">
         <div class="sponsor-card">
-          <a href="https://www.seyntex.com" target="_blank">
+          <a href="https://wwwcom
             <strong style="color:#000">SEYNTEX</strong><br>
-            <img src="data:image/png;base64,$data1" alt="Seyntex logo" class="sponsor-logo">
-          </a>
-        </div>
+            <img src="data:image/png;base64,#{data1}" alt="       </div>
         <div class="sponsor-card">
-          <a href="https://www.oip.be" target="_blank">
-            <strong style="color:#000">OIP Sensor Systems</strong><br>
-            <img src="data:image/png;base64,$data2" alt="OIP logo" class="sponsor-logo">
-          </a>
+          <a href="https://www.oip.be    <strong style="color:#000">OIP Sensor Systems</strong><br>
+            <img src="data:image/png;base64          </a>
         </div>
       </div>
 
       <h2 style="color:silver">Silver</h2>
-          <div class="sponsor-tier sponsor-cards">
-            <div class="sponsor-card">
-              <a href="https://www.baesystems.com/europe" target="_blank">
-                <strong style="color:#000">BAE Systems</strong><br>
-                <img src="data:image/png;base64,$data3"  alt="BAE logo" class="sponsor-logo">
-              </a>
-            </div>
-          </div>
+      <div class="sponsor-cards">
+        <div class="sponsor-card">
+          https://www.baesystems.com/europe
+            <strong style="color:#000">BAE Systems</strong><br>
+            <img:image/png;base64,#{data3}
+          </a>
+        </div>
       </div>
 
       <h2 style="color:#cd7f32">Bronze</h2>
-      <div class="sponsor-tier sponsor-cards">
+      <div class="sponsor-cards">
         <div class="sponsor-card">
-          <a href="https://www.ballistics.be/" target="_blank">
+          https://www.ballistics.be/
             <strong style="color:#000">ABAL</strong><br>
-            <img src="data:image/png;base64,$data4"  alt="ABAL logo" class="sponsor-logo">
+            <img src="data:image/png;base64,#{data4}" alt="ABAL logo" class      <div class="sponsor-card">
+          <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks%21#k=seks           <strong style="color:#000">KULEUVEN</strong><br>
+            <img src="data:image/png;base}
           </a>
-        </div>
-        <div class="sponsor-card">
-              <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks%21#k=seks#l=1033" target="_blank">
-                <strong style="color:#000">KULEUVEN</strong><br>
-                <img src="data:image/png;base64,$data5"  alt="BAE logo" class="sponsor-logo">
-              </a>
         </div>
       </div>
     </div>
@@ -1320,9 +1314,6 @@ route("/sponsors") do
       font-size: 2.5em;
       margin-top: 40px;
     }
-    .sponsor-tier {
-      margin-bottom: 20px;
-    }
     .sponsor-cards {
       display: flex;
       justify-content: center;
@@ -1349,9 +1340,9 @@ route("/sponsors") do
     }
   </style>
   """
-  layout("Sponsors", content)
-end
 
+  layout("Sponsors", content)
+    
 route("/contact") do
   content = """
     <div class="content">
