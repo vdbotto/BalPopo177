@@ -1,3 +1,4 @@
+#=
 import Pkg
 Pkg.add("Genie")
 Pkg.add("FileIO")
@@ -14,6 +15,7 @@ Pkg.add("SHA")
 Pkg.add("Printf")
 Pkg.add("JSON")
 Pkg.add("QRCoders")
+=#
 
 using Genie
 using Genie.Router
@@ -43,13 +45,19 @@ up(host="10.67.110.167")
 
 # automatic up() when file is changed
 @async while true
+    prev = read(filepath,String)
     url ="https://raw.githubusercontent.com/vdbotto/BalPopo177/refs/heads/main/BalPopo/Bal%20popo%20website%20actual.jl"
-    Downloads.download(url,"BalPopo/Bal popo website actual.jl")
+    try
+        Downloads.download(url,"BalPopo/Bal popo website actual.jl")
+    catch e
+        println("Error:$e")
+    end
     sleep(10)
     new = read(filepath,String)
     if prev !== new
         print("Site updated @time $(now())")
         include(filepath)
         up(host="10.67.110.167")
+    else
     end
 end

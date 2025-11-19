@@ -23,7 +23,7 @@ end
 function create_long_background(path; repetitions)
     img = load(path)
     stacked = img
-    for i in 2:
+    for i in 2:repetitions
         part = (i % 2 == 0) ? reverse(img, dims=1) : img  # Flip vertically every second image
         stacked = vcat(stacked, part)                     # Stack vertically
     end
@@ -81,7 +81,7 @@ function layout(title, content; background_css = "")
   </script>
   """
   banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
-  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=40)
+  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=20)
 
 
 
@@ -1129,10 +1129,10 @@ route("/") do
             <div class="button-icons">
             <button class="button" onclick="location.href='/theevent'">The Event</button>
             <div class="social-icons">
-                <a href="https://www.facebook.com/profile.php?id=61581494512922" target="_blank">
+                <a href="https://www.facebook.com/YourPage" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
                 </a>
-                <a href="https://www.instagram.com/ballpolytechnic177/" target="_blank">
+                <a href="https://www.instagram.com/YourPage" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-instagram-96.png"))" alt="Instagram">
                 </a>
             </div>
@@ -1164,7 +1164,7 @@ end
 route("/sponsors") do
   data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
   data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
+  data3 = logo_base64_data("BalPopo/static/LogoBAE.jpg")
   content = """
   <div class="content">
     <div class="sponsor-header">
@@ -2337,10 +2337,6 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
-
-
-
-
 
 
 
