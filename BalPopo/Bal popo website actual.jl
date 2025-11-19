@@ -357,31 +357,32 @@ function xor_decrypt_base64(enc::AbstractString, key::UInt8 = UInt8(16797))
 end
 
 const CSV_FILE = "BalPopo/registrations.csv"  # stored in the same folder as your app
-
-df = DataFrame([
-  "Timestamp",
-  "Participant",
-  "Salutation",
-  "First name",
-  "Last name",
-  "Package",
-  "Promotion",
-  "Faculty",
-  "Plus One",
-  "Plus One First name",
-  "Plus One Last name",
-  "Payment reference",
-  "Payment status",
-  "Amount (€)",
-  "Bus",
-  "Bus return time",
-  "Number of tombola tickets",
-  "Calendar purchase",
-  "Raw entry code",
-  "Encrypted email address",
-  "Encrypted phone number"
-] .=> [[] for _ in 1:21])
-CSV.write(CSV_FILE, df,writeheader=true)
+if !isfile(CSV_FILE)
+    df = DataFrame([
+      "Timestamp",
+      "Participant",
+      "Salutation",
+      "First name",
+      "Last name",
+      "Package",
+      "Promotion",
+      "Faculty",
+      "Plus One",
+      "Plus One First name",
+      "Plus One Last name",
+      "Payment reference",
+      "Payment status",
+      "Amount (€)",
+      "Bus",
+      "Bus return time",
+      "Number of tombola tickets",
+      "Calendar purchase",
+      "Raw entry code",
+      "Encrypted email address",
+      "Encrypted phone number"
+    ] .=> [[] for _ in 1:21])
+    CSV.write(CSV_FILE, df,writeheader=true)
+end
 
 # Prices
 calendar_price = 17.7
