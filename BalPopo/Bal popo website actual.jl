@@ -1286,7 +1286,7 @@ route("/sponsors") do
           </a>
         </div>
         <div class="sponsor-card">
-              <a href="https://www.kuleuven.be/kuleuven/" target="_blank">
+              <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks%21#k=seks#l=1033" target="_blank">
                 <strong style="color:#000">KULEUVEN</strong><br>
                 <img src="data:image/png;base64,$data5"  alt="BAE logo" class="sponsor-logo">
               </a>
