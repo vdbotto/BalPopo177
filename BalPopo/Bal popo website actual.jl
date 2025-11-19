@@ -1240,7 +1240,7 @@ route("/sponsors") do
   data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
   data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
   data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
-  data4 = logo_base64_data("BalPopo/static/logo ABAL.png")
+  data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
   data5 = logo_base64_data("KULEUVEN_RGB_LOGO.png")
   content = """
   <div class="content">
