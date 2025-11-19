@@ -358,25 +358,26 @@ end
 
 const CSV_FILE = "BalPopo/registrations.csv"  # stored in the same folder as your app
 
-# Ensure CSV file has headers if it doesn't exist yet
-if !isfile(CSV_FILE)
-    df = DataFrame(
-        timestamp = String[],
-        participantType = String[],
-        salutation = String[],
-        firstName = String[],
-        lastName = String[],
-        email = String[],
-        phone = String[],
-        package = String[],
-        faculty = String[],
-        promotion = String[],
-        plusOne = String[],
-        PlusOnefirstName = String[],
-        PlusOnelastName = String[]
-    )
-    CSV.write(CSV_FILE, df)
-end
+df = DataFrame([
+  "Timestamp",
+  "Participant",
+  "Salutation",
+  "First name",
+  "Last name",
+  "Encrypted email address",
+  "Encrypted phone number",
+  "Package",
+  "Promotion",
+  "Faculty",
+  "Plus One",
+  "Plus One First name",
+  "Plus One Last name",
+  "Payment reference",
+  "Payment status",
+  "Amount (€)",
+  "Raw entry code"
+] .=> [[] for _ in 1:17])
+CSV.write(CSV_FILE, df,writeheader=true)
 
 route("/Registration", method = POST) do
   try
@@ -414,9 +415,9 @@ route("/Registration", method = POST) do
       payload = string(fullname, "||", plus_full, "||", selected_formula)
       unique_code = xor_encrypt_base64(payload, UInt8(177))
 
+      # e-mail and phone number are encrypted
       enc_email = try xor_encrypt_base64(safe_get("email"), UInt8(177)) catch e; safe_get("email") end
       enc_phone = try xor_encrypt_base64(safe_get("phone"), UInt8(177)) catch e; safe_get("phone") end
-      enc_promotion = try xor_encrypt_base64(safe_get("promotion"), UInt8(177)) catch e; safe_get("promotion") end
 
       new_row = DataFrame(
           timestamp = [string(Dates.now())],
@@ -427,8 +428,8 @@ route("/Registration", method = POST) do
           email = [enc_email],
           phone = [enc_phone],
           package = [safe_get("package")],
+          promotion = [safe_get("promotion")],
           faculty = [safe_get("faculty")],
-          promotion = [enc_promotion],
           plusOne = [safe_get("plusOne")],
           PlusOnefirstName = [safe_get("PlusOnefirstName")],
           PlusOnelastName = [safe_get("PlusOnelastName")],
@@ -2337,7 +2338,6 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
-
 
 
 
