@@ -36,6 +36,7 @@ using Images
 using ImageMagick
 using Base64
 using QRCoders
+using Downloads
 
 filepath = "BalPopo/Bal popo website actual.jl"
 
@@ -60,4 +61,5 @@ up(host="10.67.110.167")
         up(host="10.67.110.167")
     else
     end
+
 end
