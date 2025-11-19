@@ -1240,6 +1240,8 @@ route("/sponsors") do
   data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
   data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
   data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
+  data4 = logo_base64_data("BalPopo/static/logo ABAL.png")
+  data5 = logo_base64_data("KULEUVEN_RGB_LOGO.png")
   content = """
   <div class="content">
     <div class="sponsor-header">
@@ -1249,12 +1251,7 @@ route("/sponsors") do
 
     <div class="sponsor-section">
       <h2 style="color:gold">Gold</h2>
-      <div class="sponsor-tier">
-        <em>No one (for now!)</em>
-      </div>
-
-      <h2 style="color:silver">Silver</h2>
-      <div class="sponsor-tier sponsor-cards">
+      <div class="sponsor-tier sponsor_card">
         <div class="sponsor-card">
           <a href="https://www.seyntex.com" target="_blank">
             <strong style="color:#000">SEYNTEX</strong><br>
@@ -1269,13 +1266,30 @@ route("/sponsors") do
         </div>
       </div>
 
+      <h2 style="color:silver">Silver</h2>
+          <div class="sponsor-tier sponsor-cards">
+            <div class="sponsor-card">
+              <a href="https://www.baesystems.com/europe" target="_blank">
+                <strong style="color:#000">BAE Systems</strong><br>
+                <img src="data:image/png;base64,$data3"  alt="BAE logo" class="sponsor-logo">
+              </a>
+            </div>
+          </div>
+      </div>
+
       <h2 style="color:#cd7f32">Bronze</h2>
       <div class="sponsor-tier sponsor-cards">
         <div class="sponsor-card">
-          <a href="https://www.baesystems.com/europe" target="_blank">
-            <strong style="color:#000">BAE Systems</strong><br>
-            <img src="data:image/png;base64,$data3"  alt="BAE logo" class="sponsor-logo">
+          <a href="https://www.ballistics.be/" target="_blank">
+            <strong style="color:#000">ABAL</strong><br>
+            <img src="data:image/png;base64,$data4"  alt="ABAL logo" class="sponsor-logo">
           </a>
+        </div>
+        <div class="sponsor-card">
+              <a href="https://www.kuleuven.be/kuleuven/" target="_blank">
+                <strong style="color:#000">KULEUVEN</strong><br>
+                <img src="data:image/png;base64,$data5"  alt="BAE logo" class="sponsor-logo">
+              </a>
         </div>
       </div>
     </div>
@@ -2410,6 +2424,7 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
 
 
