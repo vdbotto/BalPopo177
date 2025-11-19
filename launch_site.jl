@@ -38,16 +38,24 @@ using Base64
 using QRCoders
 using Downloads
 
-filepath = "BalPopo/Bal popo website actual.jl"
 
+url ="https://raw.githubusercontent.com/vdbotto/BalPopo177/refs/heads/main/BalPopo/Bal%20popo%20website%20actual.jl"
+try
+    Downloads.download(url,"BalPopo/Bal popo website actual.jl")
+catch e
+    println("Fialed to download update")
+    println("Error:$e")
+end
+
+filepath = "BalPopo/Bal popo website actual.jl"
 include(filepath)
+
 up(host="10.67.110.167")
 
 
 # automatic up() when file is changed
 @async while true
     prev = read(filepath,String)
-    url ="https://raw.githubusercontent.com/vdbotto/BalPopo177/refs/heads/main/BalPopo/Bal%20popo%20website%20actual.jl"
     try
         Downloads.download(url,"BalPopo/Bal popo website actual.jl")
     catch e
