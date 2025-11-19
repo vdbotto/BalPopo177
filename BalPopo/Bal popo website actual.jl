@@ -1164,7 +1164,7 @@ end
 route("/sponsors") do
   data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
   data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/LogoBAE.jpg")
+  data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
   content = """
   <div class="content">
     <div class="sponsor-header">
@@ -2337,6 +2337,7 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
+
 
 
 
