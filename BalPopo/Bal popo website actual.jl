@@ -521,8 +521,8 @@ route("/Registration", method = POST) do
       scan_symbol = logo_base64_data("BalPopo/static/scan_symbol_QR.png")
       banklogos = logo_base64_data("BalPopo/static/BankLogos_Belgium_5icons.png")
 
-      # ------ Final layout ------
-      return layout("Registration Submitted", """
+      # ------ Final  ------
+      return ("Registration Submitted", """
         <div class="content">
           <style>
             .content {
@@ -700,7 +700,7 @@ route("/Registration", method = POST) do
         </div>
       """)
   catch e
-      return layout("Error", "<p>There was an error processing your registration: $(e)</p>")
+      return ("Error", "<p>There was an error processing your registration: $(e)</p>")
   end
 end
 
@@ -1342,7 +1342,7 @@ route("/sponsors") do
   """
 
   layout("Sponsors", content)
-    
+end    
 route("/contact") do
   content = """
     <div class="content">
