@@ -1196,7 +1196,7 @@ route("/") do
 
       a:hover {
         color: #ffd27f;
-        text-decoration: underline;
+        text-decoration: none;
       }
 
 
