@@ -385,9 +385,8 @@ if !isfile(CSV_FILE)
 end
 
 # Prices
-calendar_price = 17.7
-dance_price = 60
-dinner_price = 150
+dance_price = 50
+dinner_price = 130
 tombola_price = 5
 
 route("/Registration", method = POST) do
