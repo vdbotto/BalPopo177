@@ -1441,7 +1441,7 @@ route("/theevent") do
     <ul class="agenda">
         <li><span class="time">19:00</span><span class="sep">  —  </span><span class="desc">Reception</span></li>
         <li><span class="time">20:00</span><span class="sep">  —  </span><span class="desc">Start dinner</span></li>
-        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert</span></li>
+        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert and Tombola</span></li>
         <li><span class="time">22:00</span><span class="sep">  —  </span><span class="desc">The roof flies off!</span></li>
         <li><span class="time">03:00</span><span class="sep">  —  </span><span class="desc">The roof gets put back on again</span></li>
     </ul>
@@ -1941,26 +1941,24 @@ route("/Privacy policy") do
   layout("Privacy policy", content)
 end
 
-route("/ourstory") do
-  # Laad afbeeldingen als base64
-  img1 = logo_base64_data("BalPopo/static/story1.jpeg")
-  img2 = logo_base64_data("BalPopo/static/story2.jpeg")
-  img3 = logo_base64_data("BalPopo/static/story3.jpeg")
-  # img4 = logo_base64_data("BalPopo/static/Rodeo.jpg")
-  img5 = logo_base64_data("BalPopo/static/Paintball1Ba.jpg")
-  img6 = logo_base64_data("BalPopo/static/Budapest2.jpg")
-  img7 = logo_base64_data("BalPopo/static/Frigate2.jpg")
-  img8 = logo_base64_data("BalPopo/static/Budapest3.jpg")
+const IMG1 = logo_base64_data("BalPopo/static/story1.jpeg")
+const IMG2 = logo_base64_data("BalPopo/static/story2.jpeg")
+const IMG3 = logo_base64_data("BalPopo/static/story3.jpeg")
+# const IMG4 = logo_base64_data("BalPopo/static/Rodeo.jpg")
+const IMG5 = logo_base64_data("BalPopo/static/Paintball1Ba.jpg")
+const IMG6 = logo_base64_data("BalPopo/static/Budapest2.jpg")
+const IMG7 = logo_base64_data("BalPopo/static/Frigate2.jpg")
+const IMG8 = logo_base64_data("BalPopo/static/Budapest3.jpg")
 
+route("/ourstory") do
   content = """
     <style>
       .content {
-          max-width: 1100px;       /* Optional: limit width for large screens */
-          margin: 100px auto;          /* Centers the content horizontally */
-          padding: 20px;           /* Adds space inside the container */
-          box-sizing: border-box;  /* Ensures padding doesn’t break layout */
+          max-width: 1100px;
+          margin: 100px auto;
+          padding: 20px;
+          box-sizing: border-box;
         }
-
       .story-block {
         margin: 40px 0;
         text-align: center;
@@ -1983,34 +1981,34 @@ route("/ourstory") do
       <p>Since it's inception in October 2022, 177 POL has been known to the RMA as a particular group of close comrades. </p>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img5" alt="Afbeelding 5">
+        <img src="data:image/jpeg;base64,$IMG5" alt="Afbeelding 5">
         <p class="caption">One of the first cohesion activities, back when 177 counted more than 40 effectives</p>
       </div>
 
       <h1>...comme des planètes</h1>
 
       <p> In the months following the evolution from platoon to promotion, our identity as a promotion was formed. Our official color, logo and animal were chosen
-      and proudly displayed on the proper occasions. 
+      and proudly displayed on the proper occasions. </p>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img3" alt="Afbeelding 3">
+        <img src="data:image/jpeg;base64,$IMG3" alt="Afbeelding 3">
         <p class="caption">The mighty lynx</p>
       </div>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img8" alt="Afbeelding 8">
+        <img src="data:image/jpeg;base64,$IMG8" alt="Afbeelding 8">
         <p class="caption">177 in Budapest</p>
       </div>
 
       <p> Counting 28 members, we're one of the biggest promotions of the faculty and a huge reception center for the fallen cousins of our <i>parrain</i> prom. Every obstacle (and there are a lot!) formed the promotion a bit more into the group we are now.</p>
       
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img1" alt="Afbeelding 1">
+        <img src="data:image/jpeg;base64,$IMG1" alt="Afbeelding 1">
         <p class="caption">177 after giving birth to 179</p>
       </div>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img2" alt="Afbeelding 2">
+        <img src="data:image/jpeg;base64,$IMG2" alt="Afbeelding 2">
         <p class="caption">The 177-frigate with it's detachable 40mm-cannon. Ammunition includes APFSDS rounds, HE rounds, blank 5.56 munition, a broomstick, and -occasionally- a vegetable or croissant.</p>
       </div>
 
@@ -2019,18 +2017,17 @@ route("/ourstory") do
       hallway to shooting range conversions and many other top secret activities have led to this unique group of people organising an even more unique event. </p>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img6" alt="Afbeelding 6">
+        <img src="data:image/jpeg;base64,$IMG6" alt="Afbeelding 6">
         <p class="caption">177's first international adventure</p>
       </div>
 
       <div class="story-block">
-        <img src="data:image/jpeg;base64,$img7" alt="Afbeelding 7">
+        <img src="data:image/jpeg;base64,$IMG7" alt="Afbeelding 7">
         <p class="caption">The frigate in it's personnel carrier configuration </p>
       </div>
 
     </div>
   """
-
   layout("Our Story", content)
 end
 
