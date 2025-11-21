@@ -1177,6 +1177,16 @@ route("/") do
           overflow-x: hidden;
       }
 
+      .content a {
+      color: #0000E4;
+      text-decoration: none;
+    }
+
+    .content a:hover {
+      color: #ffd27f;
+      text-decoration: underline;
+    }
+
 
 
   </style>
