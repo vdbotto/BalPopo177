@@ -183,7 +183,7 @@ html("""
           }
           footer a:hover {
               color: #fff;
-              text-decoration: underline;
+              text-decoration: none;
           }
 
           footer img {
