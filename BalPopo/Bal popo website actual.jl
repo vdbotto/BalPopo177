@@ -81,7 +81,7 @@ event_jsonld = raw"""
 </script>
 """
 banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
-bg = create_long_background("BalPopo/static/orange_black.png", repetitions=20)
+bg = create_long_background("BalPopo/static/orange_black.png", repetitions=4)
 
 
 
@@ -113,6 +113,7 @@ html("""
               background-size: cover;
               background-position: center top;
               background-repeat: no-repeat;
+              background-attachment: fixed;
 
               margin: 0;
               padding: 0;  
@@ -379,7 +380,7 @@ if !isfile(CSV_FILE)
     "Raw entry code",
     "Encrypted email address",
     "Encrypted phone number"
-  ] .=> [[] for _ in 1:21])
+  ] .=> [[] for _ in 1:20])
   CSV.write(CSV_FILE, df,writeheader=true)
 end
 
