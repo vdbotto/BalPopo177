@@ -659,7 +659,9 @@ try
               • Scan this QR with your <strong>banking app</strong> (not Payconiq),
               or manually transfer the money with the correct details<br>
               • Check the details: if the <strong> reference </strong> is missing, enter it manually: <code>$(payment_ref)</code> <br>
-              • Your registration is valid only after payment is received.
+              • Your registration is valid only after payment is received.<br>
+              • You will receive an email before the event with more detailed information about the bus departure timings at the RMA.<br>
+              • <strong>Payments are non-refundable once received.</strong>
             </p>
           </div>
         </div>
@@ -678,7 +680,6 @@ try
 
         <p style="margin-top:12px; color:#ddd; font-size:0.95rem;">
           Lost your code? Just register again with the same details — your entry QR will be identical.  
-          Payments are non-refundable once received.
         </p>
 
         <script>
@@ -1440,7 +1441,7 @@ route("/theevent") do
     <ul class="agenda">
         <li><span class="time">19:00</span><span class="sep">  —  </span><span class="desc">Reception</span></li>
         <li><span class="time">20:00</span><span class="sep">  —  </span><span class="desc">Start dinner</span></li>
-        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert and Tombola</span></li>
+        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert</span></li>
         <li><span class="time">22:00</span><span class="sep">  —  </span><span class="desc">The roof flies off!</span></li>
         <li><span class="time">03:00</span><span class="sep">  —  </span><span class="desc">The roof gets put back on again</span></li>
     </ul>
@@ -2033,7 +2034,7 @@ route("/ourstory") do
   layout("Our Story", content)
 end
 
-# GET route (unchanged)
+#= GET route (unchanged)
 route("/admin/checkin", method = GET) do
 content = """
 <div class="content">
@@ -2051,7 +2052,7 @@ content = """
   </form>
 
   <p style="margin-top:16px; color:#ccc;">
-    Note: set <code>ENV["ADMIN_KEY"]</code> to protect this page. If not set, the page is unprotected (use only locally).
+    Note: set <code>ENV["ADMIN_KEY"]</code> to protect this page.
   </p>
 </div>
 """
@@ -2215,7 +2216,7 @@ catch e
   return layout("Error", "<p>There was an error: $(sprint(showerror,e))</p>")
 end
 end
-
+=#
 route("/admin/scan") do
 scan_page = raw"""
 <div class="content">
