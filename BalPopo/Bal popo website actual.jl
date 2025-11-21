@@ -702,122 +702,122 @@ end
 end
 
 route("/Registration", method = GET) do
-Captcha = logo_base64_data("BalPopo/static/Captcha.jpg")
-content = """
-<style>
-form {
-  max-width: 700px;
-  margin: 50px auto;
-  padding: 0; /* No extra padding */
-  background: transparent; /* Fully transparent */
-  color: #fff;
-}
+  Captcha = logo_base64_data("BalPopo/static/Captcha.jpg")
+  content = """
+    <style>
+    form {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 0; /* No extra padding */
+      background: transparent; /* Fully transparent */
+      color: #fff;
+    }
 
-label {
-  color: #ccc; /* Light grey for labels */
-  font-weight: 500;
-}
-
-
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 30px;
-  color: #fff;
-  text-align: center; /* Like your example */
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-input, select {
-  width: 100%;
-  padding: 12px 0;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #555; /* Thin underline */
-  color: #fff;
-  font-size: 1rem;
-  margin-bottom: 20px;
-}
-
-input::placeholder, select {
-  color: #ffffff;
-  margin-bottom: 20px;
-}
-
-select option {
-  background: #111;
-  color: #fff;
-}
+    label {
+      color: #ccc; /* Light grey for labels */
+      font-weight: 500;
+    }
 
 
-input:focus, select:focus {
-  border-bottom: 1px solid #fff;
-  outline: none;
-}
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #fff;
+      text-align: center; /* Like your example */
+    }
 
-button {
-  margin-top: 30px;
-  width: 280px;
-  padding: 14px;
-  background: transparent;
-  border: 2px solid #fff;
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 0;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #555; /* Thin underline */
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    input::placeholder, select {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    select option {
+      background: #111;
+      color: #fff;
+    }
 
 
-button:hover {
-background: #fff;
-color: #000;
-}
+    input:focus, select:focus {
+      border-bottom: 1px solid #fff;
+      outline: none;
+    }
+
+    button {
+      margin-top: 30px;
+      width: 280px;
+      padding: 14px;
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
 
 
-.hidden {
-  display: none;
-}
-
-.captcha-img {
-  display: block;
-  margin: 15px 0;
-  max-width: 200px;
-}
+    button:hover {
+    background: #fff;
+    color: #000;
+    }
 
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-background-color: transparent !important;
-color: #fff !important;
--webkit-text-fill-color: #fff !important; /* Ensures white text */
--webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-transition: background-color 5000s ease-in-out 0s;
-} 
+    .hidden {
+      display: none;
+    }
 
-@media (max-width: 768px) {
-.row {
-  grid-template-columns: 1fr; /* Stack fields vertically */
-  gap: 10px; /* Reduce spacing for smaller screens */
-}
+    .captcha-img {
+      display: block;
+      margin: 15px 0;
+      max-width: 200px;
+    }
 
-form {
-  margin: 20px; /* Reduce margin on mobile */
-}
 
-button {
-  width: 100%; /* Full-width button on mobile */
-}
-}
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+    background-color: transparent !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important; /* Ensures white text */
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    } 
 
-</style>
+    @media (max-width: 768px) {
+    .row {
+      grid-template-columns: 1fr; /* Stack fields vertically */
+      gap: 10px; /* Reduce spacing for smaller screens */
+    }
+
+    form {
+      margin: 20px; /* Reduce margin on mobile */
+    }
+
+    button {
+      width: 100%; /* Full-width button on mobile */
+    }
+    }
+
+    </style>
 
 
   <div class="content">
@@ -938,9 +938,11 @@ button {
   </div>
 
   <!-- TOMBOLA -->
-  <div>
-    <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
-    <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
+  <div id="TombolaExtra" class="hidden">
+        <div>
+          <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
+          <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
+        </div>
   </div>
 
     <div id="captchaContainer" class="hidden">
@@ -955,24 +957,26 @@ button {
 
   <script>
   (function() {
-    const participantType = document.getElementById('participantType');
-    const militaryExtras = document.getElementById('militaryExtras');
-    const faculty = document.getElementById('faculty');
-    const promotion = document.getElementById('promotion');
+      const participantType = document.getElementById('participantType');
+      const militaryExtras = document.getElementById('militaryExtras');
+      const faculty = document.getElementById('faculty');
+      const promotion = document.getElementById('promotion');
 
-    const plusOne = document.getElementById('plusOne');
-    const plusOneExtras = document.getElementById('PlusOneExtras');
-    const PlusOnefirstName = document.getElementById('PlusOnefirstName');
-    const PlusOnelastName = document.getElementById('PlusOnelastName');
-    const packageSelect = document.getElementById('package');
+      const plusOne = document.getElementById('plusOne');
+      const plusOneExtras = document.getElementById('PlusOneExtras');
+      const PlusOnefirstName = document.getElementById('PlusOnefirstName');
+      const PlusOnelastName = document.getElementById('PlusOnelastName');
+      const packageSelect = document.getElementById('package');
 
-    const busService = document.getElementById('busService');
-    const busExtras = document.getElementById('busExtras');
-    const busReturnTime = document.getElementById('busReturnTime');
+      const busService = document.getElementById('busService');
+      const busExtras = document.getElementById('busExtras');
+      const busReturnTime = document.getElementById('busReturnTime');
 
-    const captchaContainer = document.getElementById('captchaContainer');
-    const captchaInput = document.getElementById('captcha');
-    const form = document.getElementById('registrationForm');
+      const tombolaExtra = document.getElementById('TombolaExtra');   // NEW
+
+      const captchaContainer = document.getElementById('captchaContainer');
+      const captchaInput = document.getElementById('captcha');
+      const form = document.getElementById('registrationForm');
 
     function toggleMilitaryExtras() {
       const isMil = participantType.value === 'military';
@@ -996,6 +1000,13 @@ button {
       packageSelect.options[2].text = show ? "Dance + Dinner (€$dinner_price pp.)" : "Dance + Dinner (€$dinner_price pp.)";
       checkFormCompletion();
     }
+      function toggleTombolaExtra() {
+        const show = packageSelect.value === 'dance_dinner';
+        tombolaExtra.classList.toggle('hidden', !show);
+        // make tombolaTickets required only when visible
+        document.getElementById('tombolaTickets').required = show;
+        checkFormCompletion();
+      }
 
     function handleFacultyChange() {
       const isNCO = faculty.value === 'NCO';
@@ -1024,6 +1035,7 @@ button {
     faculty.addEventListener('change', handleFacultyChange);
     plusOne.addEventListener('change', togglePlusOneExtras);
     busService.addEventListener('change', toggleBusExtras);
+    packageSelect.addEventListener('change', toggleTombolaExtra);   // NEW
     form.addEventListener('input', checkFormCompletion);
 
     form.addEventListener('submit', function(e) {
@@ -1041,13 +1053,14 @@ button {
       }
     });
 
-    toggleMilitaryExtras();
-    togglePlusOneExtras();
-    toggleBusExtras();
+     toggleMilitaryExtras();
+     togglePlusOneExtras();
+     toggleBusExtras();
+     toggleTombolaExtra();
   })();
   </script>
   """
-layout("Registration", content)
+  layout("Registration", content)
 end
 
 
