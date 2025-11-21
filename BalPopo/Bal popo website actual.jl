@@ -1238,111 +1238,122 @@ route("/") do
 end
 
 route("/sponsors") do
-  data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
-  data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
-  data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
-  data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
+    data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
+    data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
+    data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
+    data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
+    data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
 
-  content = """
-  <div class="content">
-    <div class="sponsor-header">
-      <h1>Our sponsors</h1>
-      <p>
-        Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:
-      </p>
-    </div>
-
-    <div class="sponsor-section">
-      <h2 style="color:gold">Gold</h2>
-      <div class="sponsor-cards">
-        <div class="sponsor-card">
-          <a href="https://wwwcom
-            <strong style="color:#000">SEYNTEX</strong><br>
-            <img src="data:image/png;base64,#{data1}" alt="       </div>
-        <div class="sponsor-card">
-          <a href="https://www.oip.be    <strong style="color:#000">OIP Sensor Systems</strong><br>
-            <img src="data:image/png;base64          </a>
-        </div>
+    content = """
+    <div class="content">
+      <div class="sponsor-header">
+        <h1>Our sponsors</h1>
+        <p>
+          Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:
+        </p>
       </div>
 
-      <h2 style="color:silver">Silver</h2>
-      <div class="sponsor-cards">
-        <div class="sponsor-card">
-          https://www.baesystems.com/europe
-            <strong style="color:#000">BAE Systems</strong><br>
-            <img:image/png;base64,#{data3}
+      <div class="sponsor-section">
+        <h2 style="color:gold">Gold</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.seyntex.com" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data1" alt="Seyntex logo" class="sponsor-logo">
+            </div>
+          </a>
+          <a href="https://www.oip.be" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data2" alt="OIP logo" class="sponsor-logo">
+            </div>
+          </a>
+        </div>
+
+        <h2 style="color:silver">Silver</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.baesystems.com/europe" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data3" alt="BAE Systems logo" class="sponsor-logo">
+            </div>
+          </a>
+        </div>
+
+        <h2 style="color:#cd7f32">Bronze</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.ballistics.be/" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data4" alt="ABAL logo" class="abal-logo">
+            </div>
+          </a>
+          <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data5" alt="KULEUVEN logo" class="sponsor-logo">
+            </div>
           </a>
         </div>
       </div>
-
-      <h2 style="color:#cd7f32">Bronze</h2>
-      <div class="sponsor-cards">
-        <div class="sponsor-card">
-          https://www.ballistics.be/
-            <strong style="color:#000">ABAL</strong><br>
-            <img src="data:image/png;base64,#{data4}" alt="ABAL logo" class      <div class="sponsor-card">
-          <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks%21#k=seks           <strong style="color:#000">KULEUVEN</strong><br>
-            <img src="data:image/png;base}
-          </a>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <style>
-    .sponsor-header {
-      text-align: center;
-      margin-bottom: 40px;
-      color: #f0f0f0;
-    }
-    .sponsor-header h1 {
-      font-size: 3em;
-      margin-bottom: 0.5em;
-    }
-    .sponsor-header p {
-      font-size: 1.1em;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .sponsor-section {
-      text-align: center;
-      padding: 40px;
-      color: #f0f0f0;
-    }
-    .sponsor-section h2 {
-      font-size: 2.5em;
-      margin-top: 40px;
-    }
-    .sponsor-cards {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 20px;
-    }
-    .sponsor-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 260px;
-      text-align: center;
-      transition: transform 0.2s;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-    .sponsor-card:hover {
-      transform: scale(1.05);
-    }
-    .sponsor-logo {
-      max-width: 180px;
-      height: auto;
-      margin-top: 12px;
-    }
-  </style>
-  """
+    <style>
+      .sponsor-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #f0f0f0;
+      }
+      .sponsor-header h1 {
+        font-size: 3em;
+        margin-bottom: 0.5em;
+      }
+      .sponsor-header p {
+        font-size: 1.1em;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .sponsor-section {
+        text-align: center;
+        padding: 40px;
+        color: #f0f0f0;
+      }
+      .sponsor-section h2 {
+        font-size: 2.5em;
+        margin-top: 40px;
+      }
+      .sponsor-cards {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 40px;
+        margin-top: 20px;
+      }
+      .sponsor-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .sponsor-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        transition: transform 0.2s;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      }
+      .sponsor-card:hover {
+        transform: scale(1.05);
+      }
+      .sponsor-logo {
+        max-width: 220px;
+        height: auto;
+      }
 
-  layout("Sponsors", content)
-end    
+      .abal-logo {
+        max-width: 180px
+      }
+
+    </style>
+    """
+
+    layout("Sponsors", content)
+end  
+
 route("/contact") do
   content = """
     <div class="content">
@@ -2416,8 +2427,3 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
-
-
-
-
-
