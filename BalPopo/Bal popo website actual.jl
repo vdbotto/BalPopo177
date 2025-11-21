@@ -389,6 +389,27 @@ dance_price = 50
 dinner_price = 130
 tombola_price = 5
 
+# automatic price change when 35 dinner packages sold and 75 dance packages sold
+@async while true
+    sleep(10)  # check every 5 minutes
+    try
+        df = CSV.read(CSV_FILE, DataFrame)
+        dinner_sold = sum(occursin("dinner", lowercase.(df.package)))
+        dance_sold = sum(occursin("dance", lowercase.(df.package)))
+
+        if dinner_sold >= 2
+            println("Dinner packages sold: $dinner_sold. Increasing dinner price to €170.")
+            dinner_price = 140
+        end
+        if dance_sold >= 3
+            println("Dance packages sold: $dance_sold. Increasing dance price to €70.")
+            dance_price = 60
+        end
+    catch e
+        println("Error updating prices: $e")
+    end
+end
+
 route("/Registration", method = POST) do
 try
     data = params()
