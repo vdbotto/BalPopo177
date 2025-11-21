@@ -12,7 +12,7 @@ end
 function background_base64_data(path)
   img = load(path)
   buf = IOBuffer()
-  ImageMagick.save(Stream(format"JPG", buf), img)
+  ImageMagick.save(Stream(format"JPG", buf), img) 
   data = base64encode(take!(buf))
   close(buf)
   return data
@@ -1215,7 +1215,7 @@ route("/") do
           xxx 177 POL</p>
           <h2>Practicalities:</h2>
           <p>DTG: 131800FEB26<br>Location:
-          <a href="https://www.lafabbrica.be/en/" target="_blank" rel="noopener noreferrer">La Fabbrica</a>
+          <a href="https://www.lafabbrica.be/en/" target="_blank" rel="noopener noreferrer">31U ES 94866 35583</a>
           <br>Tickets: Pre-sale tickets are now available!</p>
       </div>
     </div>
