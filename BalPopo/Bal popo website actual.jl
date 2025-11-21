@@ -376,7 +376,6 @@ if !isfile(CSV_FILE)
     "Bus",
     "Bus return time",
     "Number of tombola tickets",
-    "Calendar purchase",
     "Raw entry code",
     "Encrypted email address",
     "Encrypted phone number"
@@ -405,9 +404,8 @@ try
     has_dinner = occursin("dinner", pkg_raw_lower)
     has_plusone = plus_raw in ("plusone", "plus one", "plus_one", "plus one ")
     tombola_count = something(tryparse(Int, safe_get("tombolaTickets")), 0)
-    calendar_count = safe_get("calendarPurchase") == "Yes" ? 1 : 0
     amount_eur = has_dinner ? (has_plusone ? dinner_price*2 : dinner_price) : (has_plusone ? dance_price*2 : dance_price)
-    amount_eur += tombola_count * tombola_price + calendar_count * calendar_price
+    amount_eur += tombola_count * tombola_price
 
     # ------ payment reference ------
     fname_raw = strip(safe_get("firstName"))
@@ -451,7 +449,6 @@ try
         busService = [safe_get("busService")],
         busReturnTime = [safe_get("busReturnTime")],
         tombolaTickets = [string(tombola_count)],
-        calendarPurchase = [safe_get("calendarPurchase")],
         uniqueCode = [unique_code],
         email = [enc_email],
         phone = [enc_phone]
@@ -944,16 +941,6 @@ button {
   <div>
     <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
     <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0">
-  </div>
-
-  <!-- CALENDAR -->
-  <div>
-    <label for="calendarPurchase">Would you like to purchase our "special 2026 prom calendar"? ⓘ </label>
-    <select id="calendarPurchase" name="calendarPurchase" required>
-      <option value="">-- Select --</option>
-      <option value="Yes">Yes (€$calendar_price)</option>
-      <option value="No">No</option>
-    </select>
   </div>
 
     <div id="captchaContainer" class="hidden">
