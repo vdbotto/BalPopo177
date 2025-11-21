@@ -1178,15 +1178,14 @@ route("/") do
       }
 
       .content a {
-      color: #0000E4;
-      text-decoration: none;
+      color: #ffb347;
+      text-decoration: underline;
     }
 
     .content a:hover {
       color: #ffd27f;
       text-decoration: underline;
     }
-
 
 
   </style>
