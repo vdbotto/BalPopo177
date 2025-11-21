@@ -1429,12 +1429,14 @@ route("/theevent") do
 
       <h2>Program</h2>
       <ul class="agenda">
-        <li><strong>19:00</strong> — Reception</li>
-        <li><strong>20:00</strong> — Start dinner</li>
-        <li><strong>21:00</strong> — Dessert</li>
-        <li><strong>22:00</strong> — The roof flies off!</li>
-        <li><strong>03:00</strong> — The roof gets put back on again</li>
+        <li><strong>19:00</strong>     —     Reception</li>
+        <li><strong>20:00</strong>     —     Start dinner</li>
+        <li><strong>21:00</strong>     —     Dessert</li>
+        <li><strong>22:00</strong>     —     The roof flies off!</li>
+        <li><strong>03:00</strong>     —     The roof gets put back on again</li>
       </ul>
+      </br>
+      </br>
 
       <h2>Bus schedule</h2>
       <p>Starting at midnight</p>
