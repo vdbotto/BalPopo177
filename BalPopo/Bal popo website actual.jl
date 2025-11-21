@@ -940,7 +940,7 @@ button {
   <!-- TOMBOLA -->
   <div>
     <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
-    <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0">
+    <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
   </div>
 
     <div id="captchaContainer" class="hidden">
