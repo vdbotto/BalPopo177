@@ -38,8 +38,9 @@ using Base64
 using QRCoders
 using Downloads
 
-#=
+
 url ="https://raw.githubusercontent.com/vdbotto/BalPopo177/refs/heads/main/BalPopo/Bal%20popo%20website%20actual.jl"
+#=
 try
     Downloads.download(url,"BalPopo/Bal popo website actual.jl")
 catch e
@@ -72,4 +73,5 @@ up(host="10.67.110.167")
     end
 
 end
+
 
