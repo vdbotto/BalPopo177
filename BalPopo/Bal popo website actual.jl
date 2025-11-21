@@ -1440,7 +1440,7 @@ route("/theevent") do
     <ul class="agenda">
         <li><span class="time">19:00</span><span class="sep">  —  </span><span class="desc">Reception</span></li>
         <li><span class="time">20:00</span><span class="sep">  —  </span><span class="desc">Start dinner</span></li>
-        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert</span></li>
+        <li><span class="time">21:00</span><span class="sep">  —  </span><span class="desc">Dessert and Tombola</span></li>
         <li><span class="time">22:00</span><span class="sep">  —  </span><span class="desc">The roof flies off!</span></li>
         <li><span class="time">03:00</span><span class="sep">  —  </span><span class="desc">The roof gets put back on again</span></li>
     </ul>
