@@ -8,7 +8,6 @@ function logo_base64_data(path)
     return data
 end
 #Crookerijen
-# test site update 2
 
 function background_base64_data(path)
     img = load(path)
@@ -303,7 +302,7 @@ function layout(title, content; background_css = "")
           <nav class="mobile-menu">
             <div class="close-btn" onclick="toggleMenu()">✖</div>
             <a href="/">Home</a>
-            <a href="/sponsors">Sponsorssss</a>
+            <a href="/sponsors">Sponsors</a>
             <a href="/Registration">Registration</a>
             <a href="/theevent">The Event</a>
             <a href="/ourstory">Our Story</a>
@@ -358,26 +357,38 @@ function xor_decrypt_base64(enc::AbstractString, key::UInt8 = UInt8(16797))
 end
 
 const CSV_FILE = "BalPopo/registrations.csv"  # stored in the same folder as your app
-
-# Ensure CSV file has headers if it doesn't exist yet
 if !isfile(CSV_FILE)
-    df = DataFrame(
-        timestamp = String[],
-        participantType = String[],
-        salutation = String[],
-        firstName = String[],
-        lastName = String[],
-        email = String[],
-        phone = String[],
-        package = String[],
-        faculty = String[],
-        promotion = String[],
-        plusOne = String[],
-        PlusOnefirstName = String[],
-        PlusOnelastName = String[]
-    )
-    CSV.write(CSV_FILE, df)
+    df = DataFrame([
+      "Timestamp",
+      "Participant",
+      "Salutation",
+      "First name",
+      "Last name",
+      "Package",
+      "Promotion",
+      "Faculty",
+      "Plus One",
+      "Plus One First name",
+      "Plus One Last name",
+      "Payment reference",
+      "Payment status",
+      "Amount (€)",
+      "Bus",
+      "Bus return time",
+      "Number of tombola tickets",
+      "Calendar purchase",
+      "Raw entry code",
+      "Encrypted email address",
+      "Encrypted phone number"
+    ] .=> [[] for _ in 1:21])
+    CSV.write(CSV_FILE, df,writeheader=true)
 end
+
+# Prices
+calendar_price = 17.7
+dance_price = 60
+dinner_price = 150
+tombola_price = 5
 
 route("/Registration", method = POST) do
   try
@@ -393,7 +404,10 @@ route("/Registration", method = POST) do
       plus_raw = lowercase(strip(safe_get("plusOne")))
       has_dinner = occursin("dinner", pkg_raw_lower)
       has_plusone = plus_raw in ("plusone", "plus one", "plus_one", "plus one ")
-      amount_eur = has_dinner ? (has_plusone ? 354 : 177) : (has_plusone ? 200 : 100)
+      tombola_count = something(tryparse(Int, safe_get("tombolaTickets")), 0)
+      calendar_count = safe_get("calendarPurchase") == "Yes" ? 1 : 0
+      amount_eur = has_dinner ? (has_plusone ? dinner_price*2 : dinner_price) : (has_plusone ? dance_price*2 : dance_price)
+      amount_eur += tombola_count * tombola_price + calendar_count * calendar_price
 
       # ------ payment reference ------
       fname_raw = strip(safe_get("firstName"))
@@ -415,9 +429,9 @@ route("/Registration", method = POST) do
       payload = string(fullname, "||", plus_full, "||", selected_formula)
       unique_code = xor_encrypt_base64(payload, UInt8(177))
 
+      # e-mail and phone number are encrypted
       enc_email = try xor_encrypt_base64(safe_get("email"), UInt8(177)) catch e; safe_get("email") end
       enc_phone = try xor_encrypt_base64(safe_get("phone"), UInt8(177)) catch e; safe_get("phone") end
-      enc_promotion = try xor_encrypt_base64(safe_get("promotion"), UInt8(177)) catch e; safe_get("promotion") end
 
       new_row = DataFrame(
           timestamp = [string(Dates.now())],
@@ -425,18 +439,22 @@ route("/Registration", method = POST) do
           salutation = [safe_get("salutation")],
           firstName = [safe_get("firstName")],
           lastName = [safe_get("lastName")],
-          email = [enc_email],
-          phone = [enc_phone],
           package = [safe_get("package")],
+          promotion = [safe_get("promotion")],
           faculty = [safe_get("faculty")],
-          promotion = [enc_promotion],
           plusOne = [safe_get("plusOne")],
           PlusOnefirstName = [safe_get("PlusOnefirstName")],
           PlusOnelastName = [safe_get("PlusOnelastName")],
           paymentRef = [payment_ref],
           paid = ["false"],
           amount = [string(amount_eur)],
-          uniqueCode = [unique_code]
+          busService = [safe_get("busService")],
+          busReturnTime = [safe_get("busReturnTime")],
+          tombolaTickets = [string(tombola_count)],
+          calendarPurchase = [safe_get("calendarPurchase")],
+          uniqueCode = [unique_code],
+          email = [enc_email],
+          phone = [enc_phone]
       )
       CSV.write(CSV_FILE, new_row; append=true)
 
@@ -503,7 +521,7 @@ route("/Registration", method = POST) do
       scan_symbol = logo_base64_data("BalPopo/static/scan_symbol_QR.png")
       banklogos = logo_base64_data("BalPopo/static/BankLogos_Belgium_5icons.png")
 
-      # ------ Final layout ------
+      # ------ Final  ------
       return layout("Registration Submitted", """
         <div class="content">
           <style>
@@ -808,14 +826,16 @@ route("/Registration", method = GET) do
     <div class="content">
     <h1>Registration Form</h1>
     <form id="registrationForm" method="post" action="/Registration">
-      <label for="participantType">Participant Type</label>
-      <select id="participantType" name="participantType" required>
-        <option value="">-- Select --</option>
-        <option value="civil">Civilian</option>
-        <option value="military">Military</option>
-      </select>
 
       <div class="row">
+        <div>
+          <label for="participantType">Participant Type</label>
+          <select id="participantType" name="participantType" required>
+            <option value="">-- Select --</option>
+            <option value="civil">Civilian</option>
+            <option value="military">Military</option>
+          </select>
+        </div>
         <div>
           <label for="salutation">Salutation</label>
           <select id="salutation" name="salutation" required>
@@ -824,26 +844,38 @@ route("/Registration", method = GET) do
             <option value="Mrs">Mrs</option>
           </select>
         </div>
-        <div>
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
-        </div>
       </div>
 
       <div class="row">
         <div>
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
+        </div>
+        <div>
           <label for="lastName">Last Name</label>
           <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
         </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required autocomplete="email">
+        </div>
+        <div>
+          <label for="phone">Phone Number (optional)</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel">
+        </div>
+      </div>
+
+
         <div>
           <label for="plusOne">Are you inviting a +1?</label>
           <select id="plusOne" name="plusOne" required>
             <option value="">-- Select --</option>
-            <option value="Alone">Nah, I'm good</option>
+            <option value="Alone">No thank you</option>
             <option value="PlusOne">I'm bringing a +1 </option>
           </select>
         </div>
-      </div>
 
       <div id="PlusOneExtras" class="hidden">
         <div class="row">
@@ -860,21 +892,22 @@ route("/Registration", method = GET) do
 
       <div class="row">
         <div>
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required autocomplete="email">
+          <label for="package">Package</label>
+          <select id="package" name="package" required>
+            <option value="">-- Select --</option>
+            <option value="dance">Dance (€$dance_price pp.)</option>
+            <option value="dance_dinner">Dance + Dinner (€$dinner_price pp.)</option>
+          </select>
         </div>
         <div>
-          <label for="phone">Phone Number (optional)</label>
-          <input type="tel" id="phone" name="phone" autocomplete="tel">
+          <label for="busService">Would you like to use the bus service?</label>
+          <select id="busService" name="busService" required>
+            <option value="">-- Select --</option>
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
         </div>
       </div>
-
-      <label for="package">Package</label>
-      <select id="package" name="package" required>
-        <option value="">-- Select --</option>
-        <option value="dance">Dance (€100)</option>
-        <option value="dance_dinner">Dance + Dinner (€177)</option>
-      </select>
 
       <div id="militaryExtras" class="hidden">
         <div class="row">
@@ -894,6 +927,34 @@ route("/Registration", method = GET) do
           </div>
         </div>
       </div>
+
+    <!-- BUS SERVICE -->
+
+    <div id="busExtras" class="hidden">
+      <label for="busReturnTime">Desired return bus time</label>
+      <select id="busReturnTime" name="busReturnTime">
+        <option value="">-- Select time --</option>
+        <option value="00:00">00:00</option>
+        <option value="01:30">01:30</option>
+        <option value="03:00">03:00</option>
+      </select>
+    </div>
+
+    <!-- TOMBOLA -->
+    <div>
+      <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
+      <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0">
+    </div>
+
+    <!-- CALENDAR -->
+    <div>
+      <label for="calendarPurchase">Would you like to purchase our "special 2026 prom calendar"? ⓘ </label>
+      <select id="calendarPurchase" name="calendarPurchase" required>
+        <option value="">-- Select --</option>
+        <option value="Yes">Yes (€$calendar_price)</option>
+        <option value="No">No</option>
+      </select>
+    </div>
 
       <div id="captchaContainer" class="hidden">
         <label for="captcha">Verifying you are human: What's your favourite promotion? </label>
@@ -918,6 +979,10 @@ route("/Registration", method = GET) do
       const PlusOnelastName = document.getElementById('PlusOnelastName');
       const packageSelect = document.getElementById('package');
 
+      const busService = document.getElementById('busService');
+      const busExtras = document.getElementById('busExtras');
+      const busReturnTime = document.getElementById('busReturnTime');
+
       const captchaContainer = document.getElementById('captchaContainer');
       const captchaInput = document.getElementById('captcha');
       const form = document.getElementById('registrationForm');
@@ -940,8 +1005,8 @@ route("/Registration", method = GET) do
           PlusOnefirstName.value = '';
           PlusOnelastName.value = '';
         }
-        packageSelect.options[1].text = show ? "Dance (€200)" : "Dance (€100)";
-        packageSelect.options[2].text = show ? "Dance + Dinner (€354)" : "Dance + Dinner (€177)";
+        packageSelect.options[1].text = show ? "Dance (€$dance_price pp.)" : "Dance (€$dance_price pp.)";
+        packageSelect.options[2].text = show ? "Dance + Dinner (€$dinner_price pp.)" : "Dance + Dinner (€$dinner_price pp.)";
         checkFormCompletion();
       }
 
@@ -949,6 +1014,14 @@ route("/Registration", method = GET) do
         const isNCO = faculty.value === 'NCO';
         promotion.required = !isNCO && !militaryExtras.classList.contains('hidden');
         promotion.disabled = isNCO; // disable when NCO selected
+        checkFormCompletion();
+      }
+           
+      
+      function toggleBusExtras() {
+        const show = busService.value === 'Yes';
+        busExtras.classList.toggle('hidden', !show);
+        busReturnTime.required = show;
         checkFormCompletion();
       }
 
@@ -963,6 +1036,7 @@ route("/Registration", method = GET) do
       participantType.addEventListener('change', toggleMilitaryExtras);
       faculty.addEventListener('change', handleFacultyChange);
       plusOne.addEventListener('change', togglePlusOneExtras);
+      busService.addEventListener('change', toggleBusExtras);
       form.addEventListener('input', checkFormCompletion);
 
       form.addEventListener('submit', function(e) {
@@ -982,6 +1056,7 @@ route("/Registration", method = GET) do
 
       toggleMilitaryExtras();
       togglePlusOneExtras();
+      toggleBusExtras();
     })();
     </script>
     """
@@ -1130,10 +1205,10 @@ route("/") do
             <div class="button-icons">
             <button class="button" onclick="location.href='/theevent'">The Event</button>
             <div class="social-icons">
-                <a href="https://www.facebook.com/YourPage" target="_blank">
+                <a href="https://www.facebook.com/profile.php?id=61581494512922" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
                 </a>
-                <a href="https://www.instagram.com/YourPage" target="_blank">
+                <a href="https://www.instagram.com/ballpolytechnic177/" target="_blank">
                     <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-instagram-96.png"))" alt="Instagram">
                 </a>
             </div>
@@ -1163,105 +1238,121 @@ route("/") do
 end
 
 route("/sponsors") do
-  data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
-  data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/LogoBAE.jpg")
-  content = """
-  <div class="content">
-    <div class="sponsor-header">
-      <h1>Our sponsors</h1>
-      <p>Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:</p>
+    data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
+    data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
+    data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
+    data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
+    data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
+
+    content = """
+    <div class="content">
+      <div class="sponsor-header">
+        <h1>Our sponsors</h1>
+        <p>
+          Like every year, the organisation of Ball Popo could count on the very generous support from certain companies, linked to the RMA's polytechnic faculty. Without their support, the Ball wouldn't have been able to turn into the event that it is now. Our gratitude goes out to these companies who are willing to partner with us:
+        </p>
+      </div>
+
+      <div class="sponsor-section">
+        <h2 style="color:gold">Gold</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.seyntex.com" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data1" alt="Seyntex logo" class="sponsor-logo">
+            </div>
+          </a>
+          <a href="https://www.oip.be" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data2" alt="OIP logo" class="sponsor-logo">
+            </div>
+          </a>
+        </div>
+
+        <h2 style="color:silver">Silver</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.baesystems.com/europe" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data3" alt="BAE Systems logo" class="sponsor-logo">
+            </div>
+          </a>
+        </div>
+
+        <h2 style="color:#cd7f32">Bronze</h2>
+        <div class="sponsor-cards">
+          <a href="https://www.ballistics.be/" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data4" alt="ABAL logo" class="abal-logo">
+            </div>
+          </a>
+          <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks" class="sponsor-link">
+            <div class="sponsor-card">
+              <img src="data:image/png;base64,$data5" alt="KULEUVEN logo" class="sponsor-logo">
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
 
-    <div class="sponsor-section">
-      <h2 style="color:gold">Gold</h2>
-      <div class="sponsor-tier">
-        <em>No one (for now!)</em>
-      </div>
+    <style>
+      .sponsor-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #f0f0f0;
+      }
+      .sponsor-header h1 {
+        font-size: 3em;
+        margin-bottom: 0.5em;
+      }
+      .sponsor-header p {
+        font-size: 1.1em;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .sponsor-section {
+        text-align: center;
+        padding: 40px;
+        color: #f0f0f0;
+      }
+      .sponsor-section h2 {
+        font-size: 2.5em;
+        margin-top: 40px;
+      }
+      .sponsor-cards {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 40px;
+        margin-top: 20px;
+      }
+      .sponsor-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .sponsor-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        transition: transform 0.2s;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      }
+      .sponsor-card:hover {
+        transform: scale(1.05);
+      }
+      .sponsor-logo {
+        max-width: 220px;
+        height: auto;
+      }
 
-      <h2 style="color:silver">Silver</h2>
-      <div class="sponsor-tier sponsor-cards">
-        <div class="sponsor-card">
-          <a href="https://www.seyntex.com" target="_blank">
-            <strong style="color:#000">SEYNTEX</strong><br>
-            <img src="data:image/png;base64,$data1" alt="Seyntex logo" class="sponsor-logo">
-          </a>
-        </div>
-        <div class="sponsor-card">
-          <a href="https://www.oip.be" target="_blank">
-            <strong style="color:#000">OIP Sensor Systems</strong><br>
-            <img src="data:image/png;base64,$data2" alt="OIP logo" class="sponsor-logo">
-          </a>
-        </div>
-      </div>
+      .abal-logo {
+        max-width: 180px
+      }
 
-      <h2 style="color:#cd7f32">Bronze</h2>
-      <div class="sponsor-tier sponsor-cards">
-        <div class="sponsor-card">
-          <a href="https://www.baesystems.com/europe" target="_blank">
-            <strong style="color:#000">BAE Systems</strong><br>
-            <img src="data:image/png;base64,$data3"  alt="BAE logo" class="sponsor-logo">
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+    </style>
+    """
 
-  <style>
-    .sponsor-header {
-      text-align: center;
-      margin-bottom: 40px;
-      color: #f0f0f0;
-    }
-    .sponsor-header h1 {
-      font-size: 3em;
-      margin-bottom: 0.5em;
-    }
-    .sponsor-header p {
-      font-size: 1.1em;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .sponsor-section {
-      text-align: center;
-      padding: 40px;
-      color: #f0f0f0;
-    }
-    .sponsor-section h2 {
-      font-size: 2.5em;
-      margin-top: 40px;
-    }
-    .sponsor-tier {
-      margin-bottom: 20px;
-    }
-    .sponsor-cards {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 20px;
-    }
-    .sponsor-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 260px;
-      text-align: center;
-      transition: transform 0.2s;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-    .sponsor-card:hover {
-      transform: scale(1.05);
-    }
-    .sponsor-logo {
-      max-width: 180px;
-      height: auto;
-      margin-top: 12px;
-    }
-  </style>
-  """
-  layout("Sponsors", content)
-end
+    layout("Sponsors", content)
+end  
 
 route("/contact") do
   content = """
@@ -1345,13 +1436,11 @@ route("/theevent") do
       </ul>
 
       <h2>Bus schedule</h2>
-      <p>Starting at midnight, every hour</p>
+      <p>Starting at midnight</p>
       <ul class="agenda">
-        <li><strong>00:00</strong> — 2 busses</li>
-        <li><strong>01:00</strong> — 1 bus</li>
-        <li><strong>02:00</strong> — 1 bus</li>
-        <li><strong>03:00</strong> — 1 bus</li>
-        <li><strong>04:00</strong> — 2 busses</li>
+        <li><strong>00:00</strong></li>
+        <li><strong>01:30</strong></li>
+        <li><strong>03:00</strong></li>
       </ul>
 
       <p style="margin-top:18px; color:#ddd;">
@@ -2338,5 +2427,3 @@ Genie.config.server_port = 8000        # your chosen port
 
 
 =#
-
-
