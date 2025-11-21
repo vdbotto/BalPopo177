@@ -1176,15 +1176,15 @@ route("/") do
           overflow-x: hidden;
       }
 
-      .content a {
+      a {
       color: #ffb347;
       text-decoration: underline;
-    }
+      }
 
-    .content a:hover {
-      color: #ffd27f;
-      text-decoration: underline;
-    }
+      a:hover {
+        color: #ffd27f;
+        text-decoration: underline;
+      }
 
 
   </style>
