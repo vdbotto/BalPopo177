@@ -37,258 +37,224 @@ end
 
 
 function layout(title, content; background_css = "")
-favico = logo_base64_data("BalPopo/static/logo_dark.png")
+  favico = logo_base64_data("BalPopo/static/logo_dark.png")
 
-event_jsonld = raw"""
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Event",
-  "name": "Bal Popo 177",
-  "startDate": "2025-02-13T18:00",
-  "endDate": "2025-02-13T23:59",
-  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-  "eventStatus": "https://schema.org/EventScheduled",
-  "location": {
-    "@type": "Place",
-    "name": "La Fabbrica",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Avenue du Port 86C BT5",
-      "addressLocality": "Brussel",
-      "postalCode": "1000",
-      "addressCountry": "BE"
+  event_jsonld = raw"""
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Bal Popo 177",
+    "startDate": "2025-02-13T18:00",
+    "endDate": "2025-02-13T23:59",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "Place",
+      "name": "La Fabbrica",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Avenue du Port 86C BT5",
+        "addressLocality": "Brussel",
+        "postalCode": "1000",
+        "addressCountry": "BE"
+      }
+    },
+    "image": [
+      "https://jouw-ngrok-link.ngrok.io/static/POL_logo.png"
+    ],
+    "description": "The yearly ball of the RMA's polytechnic faculty.",
+    "offers": {
+      "@type": "Offer",
+      "url": "https://jouw-ngrok-link.ngrok.io/Registration",
+      "price": "0",
+      "priceCurrency": "EUR",
+      "availability": "https://schema.org/InStock",
+      "validFrom": "2024-12-01T12:00"
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": "Ball Polytechnic",
+      "url": "https://jouw-ngrok-link.ngrok.io"
     }
-  },
-  "image": [
-    "https://jouw-ngrok-link.ngrok.io/static/POL_logo.png"
-  ],
-  "description": "The yearly ball of the RMA's polytechnic faculty.",
-  "offers": {
-    "@type": "Offer",
-    "url": "https://jouw-ngrok-link.ngrok.io/Registration",
-    "price": "0",
-    "priceCurrency": "EUR",
-    "availability": "https://schema.org/InStock",
-    "validFrom": "2024-12-01T12:00"
-  },
-  "organizer": {
-    "@type": "Organization",
-    "name": "Ball Polytechnic",
-    "url": "https://jouw-ngrok-link.ngrok.io"
   }
-}
-</script>
-"""
-banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
-bg = create_long_background("BalPopo/static/orange_black.png", repetitions=4)
+  </script>
+  """
+  banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
+  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=4)
 
+  spinner_b64 = logo_base64_data("BalPopo/static/background2.png")
 
+  html("""
+    <!DOCTYPE html>
+    <html lang="nl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-html("""
-  <!DOCTYPE html>
-  <html lang="nl">
-  <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>$("Ball Popo 177 | "*title)</title>
+        $event_jsonld
+        <link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,$favico" />
 
-      <title>$("Ball Popo 177 | "*title)</title>
-      $event_jsonld
-      <link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,$favico" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
 
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
-        rel="stylesheet"
-      />
-
-      <style>
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-              font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
-
-
-              color: #f1f1f1;
-              line-height: 1.6;
-              background-image: url("data:image/png;base64,$bg");              
-              background-size: cover;
-              background-position: center top;
-              background-repeat: no-repeat;
-              background-attachment: fixed;
-
-              margin: 0;
-              padding: 0;  
-              display: flex;
-              flex-direction: column;
-              min-height: 100vh;  
-          }
-
-          html, body {
-            height: 100%;
-            margin: 0;
-          }
-
-          main {
-            flex: 1;
-            padding: 20px 40px;
-          }
-          
-          header {
-              background-color: #transparent;
-              padding: 20px 40px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-          }
-              
-          header img:hover {
-          opacity: 0.85;
-          transform: scale(1.02);
-          transition: all 0.2s ease;
-          }
-
-          header h1 { color: #FFA500; font-size: 1.8rem; }
-
-          nav { display: flex; gap: 30px; }
-          nav a {
-              color: white;
-              text-decoration: none;
-              font-weight: bold;
-              font-size: 1.1rem;
-              transition: color 0.2s;
-          }
-          nav a:hover { color: #FFA500; transform: scale(1.08); }
-
-
-          .hero h2 { font-size: 3em; margin-bottom: 10px; }
-          .hero p { font-size: 1.3em; color: #ccc; }
-
-          h1,h2,h3 { color: #FFA500; }
-          p { color: #eee; }
-          footer {
-              background-color: #111;
-              color: #ccc;
-              text-align: center;
-              padding: 20px;
-              font-size: 0.9em;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 12px;
-              flex-wrap: wrap;
-          }
-          footer a {
-              color: #ccc;
-              margin: 0 10px;
-              text-decoration: none;
-          }
-          footer a:hover {
-              color: #fff;
-              text-decoration: none;
-          }
-
-          footer img {
-            height: 20px; /* match text height */
-            vertical-align: middle;
-          }
-
-          video#eventvideo {
-              width: 100%;
-              margin-top: 20px;
-              border-radius: 10px;
-              box-shadow: 0 4px 10px rgba(255,165,0,0.2);
-          }
-              /* Base styles */
-              /* Desktop */
-
-          .nav-links {
-            display: flex;
-            gap: 20px;
-          }
-
-          .hamburger, .mobile-menu {
-            display: none;
-          }
-          .close-btn {
-            font-size: 28px;
-            color: #FFFFFF;
-            cursor: pointer;
-            margin-bottom: 20px;
-            text-align: right;
-          }
-
-          /* Mobile */
-          @media (max-width: 768px) {
-            main {
-                padding: 16px; /* Mobile-friendly */
-              }
-
-            .nav-links {
-              display: none; /* Hide desktop nav */
-            }
-            .hamburger {
-              display: block;
-              font-size: 28px;
-              cursor: pointer;
-              margin-left: auto;
-            }
-            .mobile-menu {
-              display: none;
-              flex-direction: column;
-              background: #000;
-              padding: 20px;
+        <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+                font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+                color: #f1f1f1;
+                line-height: 1.6;
+                background-image: url("data:image/png;base64,$bg");
+                background-size: cover;
+                background-position: center top;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
             }
 
-            .mobile-menu {
-              display: flex;
-              flex-direction: column;
-              background: rgba(0, 0, 0, 0.95);
+            body.loading > :not(#page-loader) {
+              filter: blur(4px);
+              -webkit-filter: blur(4px);
+              pointer-events: none;
+              user-select: none;
+            }
+
+            #page-loader {
               position: fixed;
               top: 0;
-              right: 0;
-              width: 70%; /* or 100% for full screen */
-              height: 100%;
-              padding: 40px 20px;
-              transform: translateX(100%);
-              transition: transform 0.3s ease-in-out;
-              z-index: 1000;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 99999;
+              background: rgba(0,0,0,0.35);
             }
 
-            .mobile-menu.show {
-              transform: translateX(0);
+            #page-loader .spinner {
+              width: 200px;
+              height: 200px;
+              background-image: url("data:image/png;base64,$spinner_b64");
+              background-size: contain;
+              background-position: center;
+              background-repeat: no-repeat;
+              will-change: transform;
+              animation: spin 2.6s linear infinite;
+              filter: drop-shadow(0 6px 20px rgba(0,0,0,0.55));
             }
 
-            .mobile-menu a {
-              color: #fff;
-              font-size: 1.2rem;
-              margin-bottom: 20px;
-              text-decoration: none;
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to   { transform: rotate(-360deg); }
             }
-          }
-      </style>
-      <script>
-          const origTitle = document.title;
-          document.addEventListener("visibilitychange", () => {
-            document.title = document.hidden ? "Hey, come back!" : origTitle;
-          });
 
-          function toggleMenu() {
-            const menu = document.querySelector('.mobile-menu');
-            const hamburger = document.querySelector('.hamburger');
-            menu.classList.toggle('show');
-            hamburger.textContent = menu.classList.contains('show') ? '✖' : '☰';
-          }
+            html, body { height: 100%; margin: 0; }
 
+            main { flex: 1; padding: 20px 40px; }
 
-      </script>
-  </head>
-  <body>
+            header {
+                padding: 20px 40px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            header img:hover {
+              opacity: 0.85;
+              transform: scale(1.02);
+              transition: all 0.2s ease;
+            }
+
+            header h1 { color: #FFA500; font-size: 1.8rem; }
+
+            nav { display: flex; gap: 30px; }
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 1.1rem;
+                transition: color 0.2s;
+            }
+            nav a:hover { color: #FFA500; transform: scale(1.08); }
+
+            /* MOBILE MENU */
+            .mobile-menu {
+                display: none;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background-color: #111;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                z-index: 999;
+            }
+            .mobile-menu.show { display: flex; }
+            .hamburger { cursor: pointer; font-size: 2rem; display: none; color: #fff; }
+
+            @media (max-width: 768px) {
+                nav.nav-links { display: none; }
+                .hamburger { display: block; }
+            }
+
+            h1,h2,h3 { color: #FFA500; }
+            p { color: #eee; }
+            footer {
+                background-color: #111;
+                color: #ccc;
+                text-align: center;
+                padding: 20px;
+                font-size: 0.9em;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            footer a { color: #ccc; margin: 0 10px; text-decoration: none; }
+            footer a:hover { color: #fff; text-decoration: none; }
+            footer img { height: 20px; vertical-align: middle; }
+
+            video#eventvideo {
+                width: 100%;
+                margin-top: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(255,165,0,0.2);
+            }
+        </style>
+
+        <script>
+            const origTitle = document.title;
+            document.addEventListener("visibilitychange", () => {
+              document.title = document.hidden ? "Hey, come back!" : origTitle;
+            });
+
+            function toggleMenu() {
+              const menu = document.querySelector('.mobile-menu');
+              menu.classList.toggle('show');
+            }
+        </script>
+    </head>
+
+    <body class="loading">
+      <div id="page-loader" aria-hidden="true" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
 
       <header>
         <a href="/" style="display: inline-block;">
           <img src="data:image/png;base64,$banner" alt="Ball Popo 177" style="height:80px; cursor:pointer;">
         </a>
 
-        <!-- Desktop Navigation -->
         <nav class="nav-links">
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
@@ -297,25 +263,20 @@ html("""
           <a href="/ourstory">Our Story</a>
         </nav>
 
-
         <div class="hamburger" onclick="toggleMenu()">☰</div>
 
         <nav class="mobile-menu">
-          <div class="close-btn" onclick="toggleMenu()">✖</div>
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
           <a href="/Registration">Registration</a>
           <a href="/theevent">The Event</a>
           <a href="/ourstory">Our Story</a>
         </nav>
-
       </header>
-
 
       <main>
       $content
       </main>
-
 
       <footer>
         <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/logo_white.png"))" alt="Logo">
@@ -327,10 +288,34 @@ html("""
         <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Complaints</a>
       </footer>
 
+      <script>
+        (function(){
+          function removeLoader(){
+            const loader = document.getElementById("page-loader");
+            if(!loader) {
+              document.body.classList.remove("loading");
+              return;
+            }
+            loader.style.transition = "opacity 0.45s ease";
+            loader.style.opacity = "0";
+            setTimeout(function(){
+              if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+              document.body.classList.remove("loading");
+            }, 480);
+          }
 
-  </body>
-  </html>
-""") 
+          if (document.readyState === "complete") {
+            removeLoader();
+          } else {
+            window.addEventListener("load", removeLoader, {once: true});
+            setTimeout(removeLoader, 10000);
+          }
+        })();
+      </script>
+
+    </body>
+    </html>
+  """)
 end
 
 # minimal HTML-escape helper
