@@ -2411,6 +2411,58 @@ content_type("application/json")
 return JSON.json(resp)
 end
 
+
+route("/admin/registrations", method = GET) do
+    content = """
+## Admin: View Registrations
+
+Enter the admin password to view and download all registrations.
+
+<form method="POST">
+  <input type="password" name="password" placeholder="Admin password" required>
+  <button type="submit">Access</button>
+</form>
+"""
+    layout("Admin Registrations", content)
+end
+
+route("/admin/registrations", method = POST) do
+    data = params()
+    provided_pw = get(data, :password, "")
+    correct_pw = get(ENV, "ADMIN_KEY", "")  # reuse your existing ENV key or set a new one
+
+    if provided_pw != correct_pw
+        return layout("Forbidden", "<h3>Invalid password.</h3>")
+    end
+
+    # Read CSV
+    table_html = ""
+    if isfile(CSV_FILE)
+        df = CSV.read(CSV_FILE, DataFrame)
+        # Build HTML table
+        table_html = "<table border='1' style='border-collapse:collapse;width:100%;'>"
+        table_html *= "<tr>" * join(["<th>$(escape_html(col))</th>" for col in names(df)]) * "</tr>"
+        for row in eachrow(df)
+            table_html *= "<tr>" * join(["<td>$(escape_html(string(row[col])))</td>" for col in names(df)]) * "</tr>"
+        end
+        table_html *= "</table>"
+    else
+        table_html = "<p>No registrations found.</p>"
+    end
+
+    # Download link
+    download_html = """
+<p><a hrefdownload_registrationsDownload CSV</a></p>
+"""
+
+    content = """
+## Registrations
+$download_html
+$table_html
+"""
+    layout("Admin Registrations", content)
+end
+
 Genie.config.server_host = "0.0.0.0"   # listen on all interfaces
 Genie.config.server_port = 8000        # your chosen port
 
