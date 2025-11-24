@@ -2240,8 +2240,8 @@ scan_page = raw"""
 <script>
 // Hard-coded valid encrypted codes
 const VALID_CODES = new Set([
-  "2dTfw9jakcfQ35Hex9TDx9Tdzc3NzdXQ39LU7tXY39_Uww",
-  "2dTfw9jakcfQ35Hex9TDx9Tdzc3NzdXQ39LU"
+  "8N3UydDf1dTDkfrEyMHUw8LNzeXY3N_QkeXQx9TD39jUw83N1dDf0tTu1djf39TDzc2B",
+  "89TfkefQ35HixdTU39XQ3M3Nzc3V0N_S1O7V2N_f1MPNzYE"
 ]);
 
 function xor_decrypt_base64_js(enc, key = 177) {
