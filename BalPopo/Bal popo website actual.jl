@@ -364,8 +364,9 @@ if !isfile(CSV_FILE)
     "Number of tombola tickets",
     "Raw entry code",
     "Encrypted email address",
-    "Encrypted phone number"
-  ] .=> [[] for _ in 1:20])
+    "Encrypted phone number",
+    "Dietary preferences/restrictions"
+  ] .=> [[] for _ in 1:21])
   CSV.write(CSV_FILE, df,writeheader=true)
 end
 
@@ -436,7 +437,8 @@ try
         tombolaTickets = [string(tombola_count)],
         uniqueCode = [unique_code],
         email = [enc_email],
-        phone = [enc_phone]
+        phone = [enc_phone],
+        dietary = [safe_get("dietaryPreferences")]
     )
     CSV.write(CSV_FILE, new_row; append=true)
 
@@ -928,6 +930,10 @@ route("/Registration", method = GET) do
         <div>
           <label for="tombolaTickets">How many tombola tickets would you like? (€$tombola_price each)</label>
           <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
+        </div>
+        <div>
+          <label for="dietaryPreferences">Dietary Preferences/restrictions (please specify)</label>
+          <input type="text" id="dietaryPreferences" name="dietaryPreferences">
         </div>
   </div>
 
