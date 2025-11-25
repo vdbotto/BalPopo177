@@ -376,317 +376,327 @@ dinner_price = 130
 tombola_price = 5
 
 route("/Registration", method = POST) do
-try
-    data = params()
-    safe_get = key -> begin
-        v = get(data, Symbol(key), nothing)
-        v === nothing ? "" : String(v)
-    end
+  try
+      data = params()
+      safe_get = key -> begin
+          v = get(data, Symbol(key), nothing)
+          v === nothing ? "" : String(v)
+      end
 
-    # ------ compute package/price info ------
-    pkg_raw = strip(safe_get("package"))
-    pkg_raw_lower = lowercase(pkg_raw)
-    plus_raw = lowercase(strip(safe_get("plusOne")))
-    has_dinner = occursin("dinner", pkg_raw_lower)
-    has_plusone = plus_raw in ("plusone", "plus one", "plus_one", "plus one ")
-    tombola_count = something(tryparse(Int, safe_get("tombolaTickets")), 0)
-    amount_eur = has_dinner ? (has_plusone ? dinner_price*2 : dinner_price) : (has_plusone ? dance_price*2 : dance_price)
-    amount_eur += tombola_count * tombola_price
+      # ------ compute package/price info ------
+      pkg_raw = strip(safe_get("package"))
+      pkg_raw_lower = lowercase(pkg_raw)
+      plus_raw = lowercase(strip(safe_get("plusOne")))
+      has_dinner = occursin("dinner", pkg_raw_lower)
+      has_plusone = plus_raw in ("plusone", "plus one", "plus_one", "plus one ")
+      tombola_count = something(tryparse(Int, safe_get("tombolaTickets")), 0)
+      amount_eur = has_dinner ? (has_plusone ? dinner_price*2 : dinner_price) : (has_plusone ? dance_price*2 : dance_price)
+      amount_eur += tombola_count * tombola_price
 
-    # ------ payment reference ------
-    fname_raw = strip(safe_get("firstName"))
-    fname_sanit = lowercase(replace(fname_raw, r"[^A-Za-z0-9]+" => ""))
-    sec_tag = Dates.format(Dates.now(), "SS")
-    payment_ref = isempty(fname_sanit) ? ("BP" * Dates.format(Dates.now(), "yyyymmddHHMMSS")) : (fname_sanit * sec_tag)
+      # ------ payment reference ------
+      fname_raw = strip(safe_get("firstName"))
+      fname_sanit = lowercase(replace(fname_raw, r"[^A-Za-z0-9]+" => ""))
+      sec_tag = Dates.format(Dates.now(), "SS")
+      payment_ref = isempty(fname_sanit) ? ("BP" * Dates.format(Dates.now(), "yyyymmddHHMMSS")) : (fname_sanit * sec_tag)
 
-    # ------ prepare fields for encryption ------
-    first = strip(safe_get("firstName"))
-    last  = strip(safe_get("lastName"))
-    fullname = strip(first * " " * last)
+      # ------ prepare fields for encryption ------
+      first = strip(safe_get("firstName"))
+      last  = strip(safe_get("lastName"))
+      fullname = strip(first * " " * last)
 
-    plus_first = strip(safe_get("PlusOnefirstName"))
-    plus_last  = strip(safe_get("PlusOnelastName"))
-    plus_full = isempty(plus_first) && isempty(plus_last) ? "" : strip(plus_first * " " * plus_last)
+      plus_first = strip(safe_get("PlusOnefirstName"))
+      plus_last  = strip(safe_get("PlusOnelastName"))
+      plus_full = isempty(plus_first) && isempty(plus_last) ? "" : strip(plus_first * " " * plus_last)
 
-    selected_formula = pkg_raw
-    payload = string(fullname, "||", plus_full, "||", selected_formula, "||", tombola_count)
-    unique_code = xor_encrypt_base64(payload, UInt8(177))
+      selected_formula = pkg_raw
+      payload = string(fullname, "||", plus_full, "||", selected_formula, "||", tombola_count)
+      unique_code = xor_encrypt_base64(payload, UInt8(177))
 
 
-    # e-mail and phone number are encrypted
-    enc_email = try xor_encrypt_base64(safe_get("email"), UInt8(177)) catch e; safe_get("email") end
-    enc_phone = try xor_encrypt_base64(safe_get("phone"), UInt8(177)) catch e; safe_get("phone") end
+      # e-mail and phone number are encrypted
+      enc_email = try xor_encrypt_base64(safe_get("email"), UInt8(177)) catch e; safe_get("email") end
+      enc_phone = try xor_encrypt_base64(safe_get("phone"), UInt8(177)) catch e; safe_get("phone") end
 
-    new_row = DataFrame(
-        timestamp = [string(Dates.now())],
-        participantType = [safe_get("participantType")],
-        salutation = [safe_get("salutation")],
-        firstName = [safe_get("firstName")],
-        lastName = [safe_get("lastName")],
-        package = [safe_get("package")],
-        promotion = [safe_get("promotion")],
-        faculty = [safe_get("faculty")],
-        plusOne = [safe_get("plusOne")],
-        PlusOnefirstName = [safe_get("PlusOnefirstName")],
-        PlusOnelastName = [safe_get("PlusOnelastName")],
-        paymentRef = [payment_ref],
-        paid = ["false"],
-        amount = [string(amount_eur)],
-        busService = [safe_get("busService")],
-        busReturnTime = [safe_get("busReturnTime")],
-        tombolaTickets = [string(tombola_count)],
-        uniqueCode = [unique_code],
-        email = [enc_email],
-        phone = [enc_phone],
-        dietary = [safe_get("dietaryPreferences")]
-    )
-    CSV.write(CSV_FILE, new_row; append=true)
+      new_row = DataFrame(
+          timestamp = [string(Dates.now())],
+          participantType = [safe_get("participantType")],
+          salutation = [safe_get("salutation")],
+          firstName = [safe_get("firstName")],
+          lastName = [safe_get("lastName")],
+          package = [safe_get("package")],
+          promotion = [safe_get("promotion")],
+          faculty = [safe_get("faculty")],
+          plusOne = [safe_get("plusOne")],
+          PlusOnefirstName = [safe_get("PlusOnefirstName")],
+          PlusOnelastName = [safe_get("PlusOnelastName")],
+          paymentRef = [payment_ref],
+          paid = ["false"],
+          amount = [string(amount_eur)],
+          busService = [safe_get("busService")],
+          busReturnTime = [safe_get("busReturnTime")],
+          tombolaTickets = [string(tombola_count)],
+          uniqueCode = [unique_code],
+          email = [enc_email],
+          phone = [enc_phone],
+          dietary = [safe_get("dietaryPreferences")]
+      )
 
-    # ------ Generate Entry QR ------
-    qr_b64 = ""
-    try
-        tmp_png = tempname() * ".png"
-        exportqrcode(unique_code, tmp_png)
-        img_bytes = read(tmp_png)
-        qr_b64 = base64encode(img_bytes)
-        try rm(tmp_png) catch end
-    catch e
-        qr_b64 = ""
-    end
+      if isfile(CSV_FILE)
+          existing = CSV.read(CSV_FILE, DataFrame)
+          if any(existing."Raw entry code" .== unique_code)
+              println("Duplicate registration blocked for uniqueCode: $unique_code")
+              payment_ref = existing."Payment reference"[findfirst(existing."Raw entry code" .== unique_code)]
+          else
+              CSV.write(CSV_FILE, new_row; append=true)
+          end
+      end
 
-    # ------ Generate Payment QR (EPC SEPA SCT with hack) ------
-    IBAN = "BE16 0020 0663 6774"
-    account_name  = "KMS Promotie 177 POL FV"  # hack: force ref into name
-    bic = "GEBABEBB"   # replace with your BIC
-    epc_payload = join([
-        "BCD","001","1","SCT",
-        bic,
-        account_name,
-        replace(IBAN, " " => ""),
-        "EUR" * @sprintf("%.2f", amount_eur),
-        "",
-        payment_ref
-    ], "\n")
 
-    pay_qr_b64 = ""
-    try
-        tmp_png2 = tempname() * ".png"
-        exportqrcode(epc_payload, tmp_png2)
-        img_bytes2 = read(tmp_png2)
-        pay_qr_b64 = base64encode(img_bytes2)
-        try rm(tmp_png2) catch end
-    catch e
-        pay_qr_b64 = ""
-    end
+      # ------ Generate Entry QR ------
+      qr_b64 = ""
+      try
+          tmp_png = tempname() * ".png"
+          exportqrcode(unique_code, tmp_png)
+          img_bytes = read(tmp_png)
+          qr_b64 = base64encode(img_bytes)
+          try rm(tmp_png) catch end
+      catch e
+          qr_b64 = ""
+      end
 
-    # ------ Load logo for entry QR overlay ------
-    logo_path  = "BalPopo/static/logo_dark.png"
-    logo_b64 = logo_base64_data(logo_path)
+      # ------ Generate Payment QR (EPC SEPA SCT with hack) ------
+      IBAN = "BE16 0020 0663 6774"
+      account_name  = "KMS Promotie 177 POL FV"  # hack: force ref into name
+      bic = "GEBABEBB"   # replace with your BIC
+      epc_payload = join([
+          "BCD","001","1","SCT",
+          bic,
+          account_name,
+          replace(IBAN, " " => ""),
+          "EUR" * @sprintf("%.2f", amount_eur),
+          "",
+          payment_ref
+      ], "\n")
 
-    # ------ Build HTML for entry QR (hidden behind button) ------
-    entry_qr_inner = """
-    <div style="display:flex; justify-content:center; align-items:center;">
-        <div style="position:relative; line-height:0; max-width:300px; width:100%;">
-            <img src="data:image/png;base64,$qr_b64" alt="Entry QR"
-                style="display:block; width:100%; height:auto;
-                        border:6px solid #fff; border-radius:8px; background:#fff;">
-            <img src="data:image/png;base64,$logo_b64" alt="logo"
-                style="position:absolute; left:50%; top:50%;
-                        transform:translate(-50%,-50%);
-                        width:12%; height:auto;
-                        background:#fff; padding:4px;
-                        border-radius:8px; box-sizing:border-box;">
-        </div>
-    </div>
-    """
+      pay_qr_b64 = ""
+      try
+          tmp_png2 = tempname() * ".png"
+          exportqrcode(epc_payload, tmp_png2)
+          img_bytes2 = read(tmp_png2)
+          pay_qr_b64 = base64encode(img_bytes2)
+          try rm(tmp_png2) catch end
+      catch e
+          pay_qr_b64 = ""
+      end
 
-    # ------ Build HTML for payment QR (visible) ------
-    pay_qr_html = isempty(pay_qr_b64) ? "" : "<img src=\"data:image/png;base64,$pay_qr_b64\" alt=\"Payment QR\" style=\"max-width:420px; width:100%; height:auto; border:6px solid #fff; border-radius:8px; background:#fff;\">"
-    scan_symbol = logo_base64_data("BalPopo/static/scan_symbol_QR.png")
-    banklogos = logo_base64_data("BalPopo/static/BankLogos_Belgium_5icons.png")
+      # ------ Load logo for entry QR overlay ------
+      logo_path  = "BalPopo/static/logo_dark.png"
+      logo_b64 = logo_base64_data(logo_path)
 
-    # ------ Final  ------
-    return layout("Registration Submitted", """
-      <div class="content">
-        <style>
-          .content {
-            text-align: center;
-            max-width: 900px;
-            margin: 40px auto;
-            color: #fff;
-            font-family: Arial, sans-serif;
-          }
+      # ------ Build HTML for entry QR (hidden behind button) ------
+      entry_qr_inner = """
+      <div style="display:flex; justify-content:center; align-items:center;">
+          <div style="position:relative; line-height:0; max-width:300px; width:100%;">
+              <img src="data:image/png;base64,$qr_b64" alt="Entry QR"
+                  style="display:block; width:100%; height:auto;
+                          border:6px solid #fff; border-radius:8px; background:#fff;">
+              <img src="data:image/png;base64,$logo_b64" alt="logo"
+                  style="position:absolute; left:50%; top:50%;
+                          transform:translate(-50%,-50%);
+                          width:12%; height:auto;
+                          background:#fff; padding:4px;
+                          border-radius:8px; box-sizing:border-box;">
+          </div>
+      </div>
+      """
 
-          h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-          }
+      # ------ Build HTML for payment QR (visible) ------
+      pay_qr_html = isempty(pay_qr_b64) ? "" : "<img src=\"data:image/png;base64,$pay_qr_b64\" alt=\"Payment QR\" style=\"max-width:420px; width:100%; height:auto; border:6px solid #fff; border-radius:8px; background:#fff;\">"
+      scan_symbol = logo_base64_data("BalPopo/static/scan_symbol_QR.png")
+      banklogos = logo_base64_data("BalPopo/static/BankLogos_Belgium_5icons.png")
 
-          h2 {
-            font-size: 1.4rem;
-            margin: 20px 0 10px;
-            color: #ffffff
-          }
-
-          .qr-box img.qr {
-            max-width: 20px;
-            width: 100%;
-            height: auto;
-            border: 6px solid #fff;
-            border-radius: 8px;
-            background: #fff;
-          }
-
-          .btn {
-            background: #FFA500;
-            color: #111;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            border: none;
-          }
-
-          .btn:hover {
-            background: #fff;
-            color: #000;
-          }
-
-          .payment-section {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-          }
-
-          .qr-column {
-            text-align: center;
-            max-width: 400px
-          }
-
-          .qr-column img {
-            display: block;
-            margin: 10px auto;
-            max-width: 100px
-          }
-
-          .instructions {
-            text-align: left;
-            max-width: 1000px;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1rem;
-          }
-
-          .instructions p {
-            line-height: 1.6;
-            margin-bottom: 12px;
-            color: #ddd;
-          }
-
-          strong {
-            color: #FFA500;
-          }
-
-          code {
-            background: #222;
-            color: #fff;
-            padding: 4px 6px;
-            border-radius: 4px;
-          }
-
-          .hidden {
-            display: none;
-          }
-
-          @media (max-width: 768px) {
-            .payment-section {
-              flex-direction: column;
-              align-items: center;
+      # ------ Final  ------
+      return layout("Registration Submitted", """
+        <div class="content">
+          <style>
+            .content {
+              text-align: center;
+              max-width: 900px;
+              margin: 40px auto;
+              color: #fff;
+              font-family: Arial, sans-serif;
             }
-            .btn {
+
+            h1 {
+              font-size: 2.4rem;
+              font-weight: 700;
+              margin-bottom: 20px;
+            }
+
+            h2 {
+              font-size: 1.4rem;
+              margin: 20px 0 10px;
+              color: #ffffff
+            }
+
+            .qr-box img.qr {
+              max-width: 20px;
               width: 100%;
-              margin-top: 10px;
+              height: auto;
+              border: 6px solid #fff;
+              border-radius: 8px;
+              background: #fff;
             }
-          }
-        </style>
 
-        <h1>Thank you for registering!</h1>
+            .btn {
+              background: #FFA500;
+              color: #111;
+              padding: 12px 20px;
+              border-radius: 8px;
+              font-size: 1.1rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: 0.3s;
+              border: none;
+            }
 
-        <!-- Payment QR -->
-        <h2>Payment</h2>
-        <div class="payment-section">
-          <div class="qr-column">
-            <img src="data:image/png;base64,$scan_symbol" style="height:160px;">
-          </div>
-          <div class="qr-column">
-            $pay_qr_html
-            <img src="data:image/png;base64,$banklogos" style="height:30px;">
-          </div>
-          <div class="qr-column">
-          <div class="instructions">
-          <p>
-                • beneficiary: </strong>KMS Promotie 177 POL FV</strong> <br>
-                • amount: <strong>€$(amount_eur)</strong> <br>
-                • IBAN: <strong>$(IBAN)</strong> <br>
-                • reference: <code>$(payment_ref)</code>.<br>
-            </p>
+            .btn:hover {
+              background: #fff;
+              color: #000;
+            }
+
+            .payment-section {
+              display: flex;
+              justify-content: center;
+              align-items: flex-start;
+              gap: 40px;
+              flex-wrap: wrap;
+              margin-top: 20px;
+            }
+
+            .qr-column {
+              text-align: center;
+              max-width: 400px
+            }
+
+            .qr-column img {
+              display: block;
+              margin: 10px auto;
+              max-width: 100px
+            }
+
+            .instructions {
+              text-align: left;
+              max-width: 1000px;
+              background: rgba(255,255,255,0.05);
+              padding: 15px;
+              border-radius: 8px;
+              font-size: 1rem;
+            }
+
+            .instructions p {
+              line-height: 1.6;
+              margin-bottom: 12px;
+              color: #ddd;
+            }
+
+            strong {
+              color: #FFA500;
+            }
+
+            code {
+              background: #222;
+              color: #fff;
+              padding: 4px 6px;
+              border-radius: 4px;
+            }
+
+            .hidden {
+              display: none;
+            }
+
+            @media (max-width: 768px) {
+              .payment-section {
+                flex-direction: column;
+                align-items: center;
+              }
+              .btn {
+                width: 100%;
+                margin-top: 10px;
+              }
+            }
+          </style>
+
+          <h1>Thank you for registering!</h1>
+
+          <!-- Payment QR -->
+          <h2>Payment</h2>
+          <div class="payment-section">
+            <div class="qr-column">
+              <img src="data:image/png;base64,$scan_symbol" style="height:160px;">
+            </div>
+            <div class="qr-column">
+              $pay_qr_html
+              <img src="data:image/png;base64,$banklogos" style="height:30px;">
+            </div>
+            <div class="qr-column">
+            <div class="instructions">
+            <p>
+                  • beneficiary: </strong>KMS Promotie 177 POL FV</strong> <br>
+                  • amount: <strong>€$(amount_eur)</strong> <br>
+                  • IBAN: <strong>$(IBAN)</strong> <br>
+                  • reference: <code>$(payment_ref)</code>.<br>
+              </p>
+              </div>
+            </div>
+
+
+            <div class="instructions">
+              <p>
+                • Scan this QR with your <strong>banking app</strong> (not Payconiq),
+                or manually transfer the money with the correct details<br>
+                • Check the details: if the <strong> reference </strong> is missing, enter it manually: <code>$(payment_ref)</code> <br>
+                • Your registration is valid only after payment is received.<br>
+                • You will receive an email before the event with more detailed information about the bus departure timings at the RMA.<br>
+                • <strong>Payments are non-refundable once received.</strong>
+              </p>
             </div>
           </div>
 
-
-          <div class="instructions">
-            <p>
-              • Scan this QR with your <strong>banking app</strong> (not Payconiq),
-              or manually transfer the money with the correct details<br>
-              • Check the details: if the <strong> reference </strong> is missing, enter it manually: <code>$(payment_ref)</code> <br>
-              • Your registration is valid only after payment is received.<br>
-              • You will receive an email before the event with more detailed information about the bus departure timings at the RMA.<br>
-              • <strong>Payments are non-refundable once received.</strong>
-            </p>
+          <!-- Entry QR -->
+          <div class="qr-box">
+            <h2>Entry QR</h2>
+            <button id="toggleEntryQR" class="btn">Show entry code</button>
+            <div id="entryQRWrap" class="hidden" style="margin-top:12px;">
+              $entry_qr_inner
+              <p style="margin-top:8px; color:#bbb; font-size:0.95rem;">
+                You can also use the raw text: <code>$(unique_code)</code>
+              </p>
+            </div>
           </div>
+
+          <p style="margin-top:12px; color:#ddd; font-size:0.95rem;">
+            Lost your code? Just register again with the same details — your entry QR will be identical.  
+          </p>
+
+          <script>
+            (function() {
+              var btn = document.getElementById('toggleEntryQR');
+              var wrap = document.getElementById('entryQRWrap');
+              if (btn && wrap) {
+                btn.addEventListener('click', function() {
+                  var isHidden = wrap.classList.contains('hidden');
+                  wrap.classList.toggle('hidden', !isHidden);
+                  btn.textContent = isHidden ? 'Hide entry code' : 'Show entry code';
+                });
+              }
+            })();
+          </script>
         </div>
-
-        <!-- Entry QR -->
-        <div class="qr-box">
-          <h2>Entry QR</h2>
-          <button id="toggleEntryQR" class="btn">Show entry code</button>
-          <div id="entryQRWrap" class="hidden" style="margin-top:12px;">
-            $entry_qr_inner
-            <p style="margin-top:8px; color:#bbb; font-size:0.95rem;">
-              You can also use the raw text: <code>$(unique_code)</code>
-            </p>
-          </div>
-        </div>
-
-        <p style="margin-top:12px; color:#ddd; font-size:0.95rem;">
-          Lost your code? Just register again with the same details — your entry QR will be identical.  
-        </p>
-
-        <script>
-          (function() {
-            var btn = document.getElementById('toggleEntryQR');
-            var wrap = document.getElementById('entryQRWrap');
-            if (btn && wrap) {
-              btn.addEventListener('click', function() {
-                var isHidden = wrap.classList.contains('hidden');
-                wrap.classList.toggle('hidden', !isHidden);
-                btn.textContent = isHidden ? 'Hide entry code' : 'Show entry code';
-              });
-            }
-          })();
-        </script>
-      </div>
-    """)
-catch e
-    return layout("Error", "<p>There was an error processing your registration: $(e)</p>")
-end
+      """)
+  catch e
+      return layout("Error", "<p>There was an error processing your registration: $(e)</p>")
+  end
 end
 
 route("/Registration", method = GET) do
@@ -932,7 +942,7 @@ route("/Registration", method = GET) do
           <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
         </div>
         <div>
-          <label for="dietaryPreferences">Dietary Preferences/restrictions (optional): please specify</label>
+          <label for="dietaryPreferences">Dietary Preferences/restrictions (please specify)</label>
           <input type="text" id="dietaryPreferences" name="dietaryPreferences">
         </div>
   </div>
@@ -2439,6 +2449,26 @@ route("/admin/registrations", method = POST) do
 
     if provided_pw != correct_pw
         return layout("Forbidden", "<h3>Invalid password.</h3>")
+    end
+
+    # small script that finds doubles and only keeps the first registration based on "Raw entry code"
+    # (not strictly necessary, but keeps the CSV clean)
+    function remove_duplicates!(csv_file)
+        df = CSV.read(csv_file, DataFrame)
+        unique_codes = Set{String}()
+        rows_to_keep = BitVector(trues(nrow(df)))
+
+        for (i, row) in enumerate(eachrow(df))
+            code = row[:uniqueCode]
+            if code in unique_codes
+                rows_to_keep[i] = false
+            else
+                push!(unique_codes, code)
+            end
+        end
+
+        filtered_df = df[rows_to_keep, :]
+        CSV.write(csv_file, filtered_df; writeheader=true)
     end
 
     # Read CSV
