@@ -824,7 +824,7 @@ route("/Registration", method = GET) do
         <select id="salutation" name="salutation" required>
           <option value="">-- Select --</option>
           <option value="Mr">Mr</option>
-          <option value="Mrs">Mrs</option>
+          <option value="Mrs/Ms">Mrs/Ms</option>
         </select>
       </div>
     </div>
