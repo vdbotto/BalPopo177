@@ -932,7 +932,7 @@ route("/Registration", method = GET) do
           <input type="number" id="tombolaTickets" name="tombolaTickets" value="0" min="0" max = "50">
         </div>
         <div>
-          <label for="dietaryPreferences">Dietary Preferences/restrictions (please specify)</label>
+          <label for="dietaryPreferences">Dietary Preferences/restrictions (optional): please specify</label>
           <input type="text" id="dietaryPreferences" name="dietaryPreferences">
         </div>
   </div>
