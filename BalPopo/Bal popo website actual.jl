@@ -372,7 +372,7 @@ end
 
 # Prices
 dance_price = 50
-dinner_price = 130
+dinner_price = 140
 tombola_price = 5
 
 route("/Registration", method = POST) do
@@ -890,7 +890,7 @@ route("/Registration", method = GET) do
         <label for="package">Package</label>
         <select id="package" name="package" required>
           <option value="">-- Select --</option>
-          <option value="dance">Dance (€$dance_price pp.)</option>
+          <option value="dance">Dance (Early bird €$dance_price pp.)</option>
           <option value="dance_dinner">Dance + Dinner (€$dinner_price pp.)</option>
         </select>
       </div>
