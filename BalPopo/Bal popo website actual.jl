@@ -7,7 +7,7 @@ function logo_base64_data(path)
   close(buf)
   return data
 end
-#Crookerijen 2
+#Crookerijen
 
 function background_base64_data(path)
   img = load(path)
