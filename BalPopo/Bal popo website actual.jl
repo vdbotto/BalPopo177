@@ -371,7 +371,7 @@ if !isfile(CSV_FILE)
 end
 
 # Prices
-dance_price = 50
+dance_price = 60
 dinner_price = 140
 tombola_price = 5
 
