@@ -1216,7 +1216,7 @@ route("/") do
           <div class="button-icons">
           <button class="button" onclick="location.href='/theevent'">The Event</button>
           <div class="social-icons">
-              <a href="https://www.facebook.com/profile.php?id=61581494512922" target="_blank">
+              <a href="https://fb.me/e/3pklOfDoj" target="_blank">
                   <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
               </a>
               <a href="https://www.instagram.com/ballpolytechnic177/" target="_blank">
@@ -1295,7 +1295,7 @@ route("/sponsors") do
             <img src="data:image/png;base64,$data4" alt="ABAL logo" class="abal-logo">
           </div>
         </a>
-        <a href="https://search.kuleuven.be/en/Pages/results.aspx?k=seks" class="sponsor-link">
+        <a href="https://search.kuleuven.be" class="sponsor-link">
           <div class="sponsor-card">
             <img src="data:image/png;base64,$data5" alt="KULEUVEN logo" class="sponsor-logo">
           </div>
