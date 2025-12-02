@@ -2451,25 +2451,6 @@ route("/admin/registrations", method = POST) do
         return layout("Forbidden", "<h3>Invalid password.</h3>")
     end
 
-    # small script that finds doubles and only keeps the first registration based on "Raw entry code"
-    # (not strictly necessary, but keeps the CSV clean)
-    function remove_duplicates!(csv_file)
-        df = CSV.read(csv_file, DataFrame)
-        unique_codes = Set{String}()
-        rows_to_keep = BitVector(trues(nrow(df)))
-
-        for (i, row) in enumerate(eachrow(df))
-            code = row[:uniqueCode]
-            if code in unique_codes
-                rows_to_keep[i] = false
-            else
-                push!(unique_codes, code)
-            end
-        end
-
-        filtered_df = df[rows_to_keep, :]
-        CSV.write(csv_file, filtered_df; writeheader=true)
-    end
 
     # Read CSV
     table_html = ""
@@ -2486,18 +2467,61 @@ route("/admin/registrations", method = POST) do
         table_html = "<p>No registrations found.</p>"
     end
 
-    # Download link
-    download_html = """
-<p><a hrefdownload_registrationsDownload CSV</a></p>
+ # Add Download Button
+buttons_html = """
+<style>
+.admin-btn {
+    display: inline-block;
+    padding: 14px 24px;
+    margin: 12px 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #ff6600;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.admin-btn:hover {
+    background-color: #e65c00;
+}
+</style>
+
+<div style="margin-top:20px;">
+    <a href="/admin/download_registrations" class="admin-btn">Download CSV</a>
+</div>
 """
 
+
     content = """
-## Registrations
-$download_html
-$table_html
-"""
+    <h2>Registrations</h2>
+    $table_html
+    $buttons_html
+    """
     layout("Admin Registrations", content)
 end
+
+
+
+route("/admin/download_registrations", method = GET) do
+    if !isfile(CSV_FILE)
+        return layout("Error", "<p>CSV file not found.</p>")
+    end
+
+    csv_data = read(CSV_FILE, String)
+
+    # Build raw HTTP response manually
+    return HTTP.Response(
+        200,
+        ["Content-Type" => "text/csv",
+         "Content-Disposition" => "attachment; filename=\"registrations.csv\""],
+        csv_data
+    )
+end
+
+
+
 
 Genie.config.server_host = "0.0.0.0"   # listen on all interfaces
 Genie.config.server_port = 8000        # your chosen port
