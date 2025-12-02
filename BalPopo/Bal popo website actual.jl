@@ -2442,6 +2442,8 @@ Enter the admin password to view and download all registrations.
     layout("Admin Registrations", content)
 end
 
+using HTTP
+
 route("/admin/registrations", method = POST) do
     data = params()
     provided_pw = get(data, :password, "")
