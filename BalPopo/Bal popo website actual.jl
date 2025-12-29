@@ -1889,7 +1889,7 @@ route("/Privacy policy") do
       <p>Les données d’inscription sont nécessaires pour l’identification lors du bal. L’adresse IP est utilisée à des fins statistiques et pour vérifier les inscriptions frauduleuses.</p>
 
       <h3>5. Comment stockons-nous vos données ?</h3>
-      <p>Toutes les données sont stockées sur notre serveur à la KMS. Elles seront supprimées au plus tard le 15/03/2026 et conservées au moins jusqu’au bal (14/02/2026).</p>
+      <p>Toutes les données sont stockées sur notre serveur à l'ERM. Elles seront supprimées au plus tard le 15/03/2026 et conservées au moins jusqu’au bal (14/02/2026).</p>
 
       <h3>6. Comment protégeons-nous vos données ?</h3>
       <p>Vos coordonnées de contact (adresse e-mail et éventuellement numéro de téléphone) sont stockées de manière protégée. La clé n’est pas partagée en dehors du comité d’organisation du bal.  
@@ -1983,7 +1983,7 @@ route("/ourstory") do
 
       <div class="story-block">
         <img src="data:image/jpeg;base64,$IMG5" alt="Afbeelding 5">
-        <p class="caption">One of the first cohesion activities, back when 177 counted more than 40 effectives</p>
+        <p class="caption">One of the first cohesion activities, back when 177 counted more than 30 effectives</p>
       </div>
 
       <h1>...comme des planètes</h1>
