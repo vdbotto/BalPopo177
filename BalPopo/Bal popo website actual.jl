@@ -1212,7 +1212,7 @@ route("/") do
                 alt="Ball Popo logo"
                 class="text-logo">
           </hkwn>
-          <p>Whether you're an engineer, SDIV student, civilian partner, NCO or "social scientist", we'd like to welcome you to our website and invite you to Ball Popo!</p>
+          <p>Whether you're an engineer, SDIV student, civilian partner, NCO or "social and military scientist", we'd like to welcome you to our website and invite you to Ball Popo!</p>
           <div class="button-icons">
           <button class="button" onclick="location.href='/theevent'">The Event</button>
           <div class="social-icons">
