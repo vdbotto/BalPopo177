@@ -1072,16 +1072,32 @@ end
 
 
 route("/crook") do
-layout("Crookpagina", """
-  <div class="hero">
-    <h2>Proficiat!</h2>
-  </div>
-  <div class="content">
-    <h1>Geheime pagina gevonden</h1>
-    <p>U bent op de geheime pagina. Indien u SSMW bent ⇒ buiten!</p>
-    <p>De naaktfoto's van de prom vind je hieronder:</p>
-  </div>
-""")
+    img_shuffle = logo_base64_data("BalPopo/static/Shuffle.jpg")
+    img_sodexo  = logo_base64_data("BalPopo/static/Sodexo.jpg")
+
+    layout("Crookpagina", """
+    <div class="hero" style="text-align:center; padding:50px 20px;">
+      <h2>Proficiat!</h2>
+    </div>
+
+    <div class="content" style="text-align:center; padding:30px;">
+      <h1>Geheime pagina gevonden</h1>
+      <p>U bent op de geheime pagina. Indien u SSMW bent ⇒ buiten!</p>
+      <p style="margin-top:15px;">Meet your organiser:</p>
+
+      <div class="images" style="display:flex; justify-content:center; align-items:center; gap:50px; flex-wrap:wrap; margin-top:30px;">
+        <img src="data:image/jpeg;base64,$img_shuffle" alt="Shuffle" style="max-width:240px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.4); transition:transform 0.3s;">
+        <img src="data:image/jpeg;base64,$img_sodexo" alt="Sodexo" style="max-width:240px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.4); transition:transform 0.3s;">
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll('.images img').forEach(img => {
+        img.addEventListener('mouseover', () => img.style.transform = 'scale(1.05)');
+        img.addEventListener('mouseout', () => img.style.transform = 'scale(1)');
+      });
+    </script>
+    """)
 end
 
 route("/") do
