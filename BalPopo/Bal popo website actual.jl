@@ -1240,7 +1240,6 @@ route("/") do
           <h2>Practicalities:</h2>
           <p>DTG: 131800FEB26<br>Location:
           <a href="https://www.lafabbrica.be/en/" target="_blank" rel="noopener noreferrer">31U ES 94866 35583</a>
-          <br>Tickets: Early bird tickets are now available and limited!</p>
       </div>
     </div>
   """
@@ -1254,6 +1253,7 @@ route("/sponsors") do
   data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
   data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
   data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
+  data6 = logo_base64_data("BalPopo/static/skydive-spa-logo.jpg")
 
   content = """
   <div class="content">
@@ -1298,6 +1298,11 @@ route("/sponsors") do
         <a href="https://search.kuleuven.be" class="sponsor-link">
           <div class="sponsor-card">
             <img src="data:image/png;base64,$data5" alt="KULEUVEN logo" class="sponsor-logo">
+          </div>
+        </a>
+        <a href="https://skydivespa.be/en/" class="sponsor-link">
+          <div class="sponsor-card">
+            <img src="data:image/png;base64,$data6" alt="skydive-spa-logo" class="sponsor-logo">
           </div>
         </a>
       </div>
