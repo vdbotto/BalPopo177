@@ -1295,14 +1295,9 @@ route("/sponsors") do
             <img src="data:image/png;base64,$data4" alt="ABAL logo" class="abal-logo">
           </div>
         </a>
-        <a href="https://search.kuleuven.be" class="sponsor-link">
+        <a href="https://www.kuleuven.be" class="sponsor-link">
           <div class="sponsor-card">
             <img src="data:image/png;base64,$data5" alt="KULEUVEN logo" class="sponsor-logo">
-          </div>
-        </a>
-        <a href="https://skydivespa.be/en/" class="sponsor-link">
-          <div class="sponsor-card">
-            <img src="data:image/jpeg;base64,$data6" alt="skydive-spa-logo" class="sponsor-logo">
           </div>
         </a>
       </div>
