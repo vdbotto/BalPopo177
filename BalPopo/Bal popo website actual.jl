@@ -1302,7 +1302,7 @@ route("/sponsors") do
         </a>
         <a href="https://skydivespa.be/en/" class="sponsor-link">
           <div class="sponsor-card">
-            <img src="data:image/png;base64,$data6" alt="skydive-spa-logo" class="sponsor-logo">
+            <img src="data:image/jpeg;base64,$data6" alt="skydive-spa-logo" class="sponsor-logo">
           </div>
         </a>
       </div>
