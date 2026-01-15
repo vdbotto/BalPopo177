@@ -1325,6 +1325,7 @@ route("/sponsors") do
           <div class="sponsor-card">
             <img src="data:image/png;base64,$data6" alt="skydive logo" class="sponsor-logo">
           </div>
+        </a>
       </div>
     </div>
   </div>
