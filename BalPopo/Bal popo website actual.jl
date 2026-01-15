@@ -1255,7 +1255,7 @@ end
 route("/sponsors") do
   data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
   data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/skydive-spa-logo.jpg")
+  data3 = logo_base64_data_from_url("https://raw.githubusercontent.com/vdbotto/BalPopo177/main/BalPopo/static/skydive-spa-logo.jpg")
   data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
   data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
 
