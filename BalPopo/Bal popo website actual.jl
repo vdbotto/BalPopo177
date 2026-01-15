@@ -7,7 +7,12 @@ function logo_base64_data(path)
   close(buf)
   return data
 end
-#Crookerijen
+
+# voor github fotos ipv local server kak
+function logo_base64_data_from_url(url::String)
+    response = HTTP.get(url)
+    return base64encode(response.body)
+end
 
 function background_base64_data(path)
   img = load(path)
