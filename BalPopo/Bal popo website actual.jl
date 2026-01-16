@@ -1396,10 +1396,7 @@ content = """
   <div class="content">
     <h1>Contact</h1>
     <p>General questions about the ball? Don't hesitate to contact us via e-mail:</p>
-    <p><a href="mailto:bal@177pol.rma.ac.be">bal@177pol.rma.ac.be</a></p>
-
-    <p>Questions about sponsorship? Head to:</p>
-    <p><a href="mailto:sponsors@177pol.rma.ac.be">sponsors@177pol.rma.ac.be</a></p>
+    <p><a href="mailto:erm-177pol-balpolytechniek@mil.be">erm-177pol-balpolytechniek@mil.be</a></p>
 
     <address>
       Renaissancelaan 30<br>
