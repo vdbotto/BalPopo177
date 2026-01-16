@@ -2605,6 +2605,8 @@ route("/registration/confirmation/:raw", method = GET) do
     # 3 — Package → arrival time
     # ==========================
     pkg_raw = safeval("Package") |> lowercase
+    has_dinner = occursin("dinner", pkg_raw)
+    pretty_package = has_dinner ? "Dinner + Dance (the better choice)" : "Dance"
     arrival_time = occursin("dinner", pkg_raw) ? "19:00" : "22:00"
 
     # Bus sentence
@@ -2681,13 +2683,28 @@ route("/registration/confirmation/:raw", method = GET) do
     # ==========================
     # 6 — Responsive Details Table
     # ==========================
+
     details_rows = String[
         "<tr class='details-row'><td class='details-label'>You</td><td class='details-value'>$fname $lname</td></tr>",
-        (show_plus ? "<tr class='details-row'><td class='details-label'>Plus one</td><td class='details-value'>$(strip(plusf)) $plus_lastname</td></tr>" : ""),
-        "<tr class='details-row'><td class='details-label'>Tombola tickets</td><td class='details-value'>$tombola</td></tr>",
-        "<tr class='details-row'><td class='details-label'>Dietary preferences</td><td class='details-value'>$(isempty(strip(dietary)) ? "None" : dietary)</td></tr>",
-        (show_bus ? "<tr class='details-row'><td class='details-label'>Bus return time</td><td class='details-value'>$bus_return</td></tr>" : "")
+        "<tr class='details-row'><td class='details-label'>Package</td><td class='details-value'>$pretty_package</td></tr>",
+        (show_plus ?
+            "<tr class='details-row'><td class='details-label'>Plus one</td><td class='details-value'>$(strip(plusf)) $plus_lastname</td></tr>" :
+            ""
+        ),
+        (has_dinner ?
+            "<tr class='details-row'><td class='details-label'>Tombola tickets</td><td class='details-value'>$tombola</td></tr>" :
+            ""
+        ),
+        (has_dinner ?
+            "<tr class='details-row'><td class='details-label'>Dietary preferences</td><td class='details-value'>$(isempty(strip(dietary)) ? "None" : dietary)</td></tr>" :
+            ""
+        ),
+        (show_bus ?
+            "<tr class='details-row'><td class='details-label'>Bus return time</td><td class='details-value'>$bus_return</td></tr>" :
+            ""
+        )
     ]
+
 
     details_html = """
     <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
