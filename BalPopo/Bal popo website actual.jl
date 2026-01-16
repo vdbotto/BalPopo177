@@ -2545,7 +2545,299 @@ route("/admin/download_registrations", method = GET) do
     )
 end
 
+route("/registration/confirmation/:raw", method = GET) do
+    raw = params(:raw) |> String |> strip
 
+    # ==========================
+    # 1 — Load CSV and find row
+    # ==========================
+    if !isfile(CSV_FILE)
+        return layout("Error", "<p>No registrations found.</p>")
+    end
+
+    df = CSV.read(CSV_FILE, DataFrame)
+
+    if !("Raw entry code" in names(df))
+        return layout("Error",
+            "<p>CSV missing column: <code>Raw entry code</code></p>")
+    end
+
+    matches = findall(x -> !ismissing(x) && String(x) == raw, df[!, "Raw entry code"])
+    if isempty(matches)
+        return layout("Error",
+            "<p>No registration found for code <code>$raw</code>.</p>")
+    end
+
+    row = df[matches[1], :]
+
+    # Safe getter
+    function safeval(col)
+        if !(col in names(df)); return ""; end
+        v = row[col]
+        v === missing ? "" : string(v)
+    end
+
+    # ==========================
+    # 2 — Extract registration fields
+    # ==========================
+    sal        = safeval("Salutation")
+    fname      = safeval("First name")
+    lname      = safeval("Last name")
+    fullname   = strip("$fname $lname")
+
+    plus_flag  = lowercase(strip(safeval("Plus One")))
+    plusf      = safeval("Plus One First name")
+    plusl      = safeval("Plus One Last name")
+
+    # Only LAST name for plus one
+    plus_lastname = strip(plusl)
+    show_plus = !isempty(plus_lastname) && !(plus_flag in ("no", "no thank you"))
+
+    tombola    = safeval("Number of tombola tickets")
+    dietary    = safeval("Dietary preferences/restrictions")
+    bus_return = safeval("Bus return time")
+    bus_service_raw = lowercase(strip(safeval("Bus")))
+    show_bus = !isempty(bus_return) && !(lowercase(bus_return) in ("-", "n/a", "select"))
+
+    show_bus_info = bus_service_raw == "yes"
+
+    # ==========================
+    # 3 — Package → arrival time
+    # ==========================
+    pkg_raw = safeval("Package") |> lowercase
+    arrival_time = occursin("dinner", pkg_raw) ? "19:00" : "22:00"
+
+    # Bus sentence
+    bus_sentence = show_bus_info ?
+        "You can take the bus at 18:30 in front of the RMA (Renaissancelaan)." :
+        ""
+
+    # ==========================
+    # 4 — Rebuild Entry QR
+    # ==========================
+    qr_b64 = ""
+    try
+        tmp_png = tempname() * ".png"
+        exportqrcode(raw, tmp_png)
+        qr_b64 = base64encode(read(tmp_png))
+        try rm(tmp_png) catch end
+    catch
+        qr_b64 = ""
+    end
+
+    logo_b64 = logo_base64_data("BalPopo/static/logo_dark.png")
+
+    entry_qr_inner = """
+    <div style="display:flex; justify-content:center; align-items:center;">
+      <div style="position:relative; line-height:0; max-width:300px; width:100%;">
+        <img src="data:image/png;base64,$qr_b64" alt="Entry QR"
+             style="display:block; width:100%; height:auto;
+             border:6px solid #fff; border-radius:12px; background:#fff;
+             box-shadow:0 12px 24px rgba(0,0,0,.28);" />
+        <img src="data:image/png;base64,$logo_b64" alt="logo"
+             style="position:absolute; left:50%; top:50%;
+             transform:translate(-50%,-50%); width:12%; height:auto;
+             background:#fff; padding:4px; border-radius:8px;
+             box-shadow:0 2px 6px rgba(0,0,0,.2);" />
+      </div>
+    </div>
+    """
+
+    # ==========================
+    # 5 — Greeting paragraph
+    # ==========================
+    plus_phrase = show_plus ? " and $(strip(plusf)) $plus_lastname" : ""
+
+    greeting_html = """
+    <div class="info-box" style="backdrop-filter: blur(6px);">
+      <p style="margin:0;">
+        Dear $sal $lname,
+      </p>
+
+      <p style="margin-top:12px;">
+        We have successfully processed your registration and we will be
+        waiting for you$plus_phrase on the 13th of February as from $arrival_time.
+      </p>
+
+      <p style="margin-top:12px;">
+        $bus_sentence
+      </p>
+
+      <p style="margin-top:12px;">
+        Please find your registration details and your entry ticket on this page.
+      </p>
+
+      <p style="margin-top:12px;">
+        See you then!
+      </p>
+
+      <p style="margin-top:12px;">
+        Kind regards,<br/>
+        Ball Popo 177 Team
+      </p>
+    </div>
+    """
+
+    # ==========================
+    # 6 — Responsive Details Table
+    # ==========================
+    details_rows = String[
+        "<tr class='details-row'><td class='details-label'>You</td><td class='details-value'>$fname $lname</td></tr>",
+        (show_plus ? "<tr class='details-row'><td class='details-label'>Plus one</td><td class='details-value'>$(strip(plusf)) $plus_lastname</td></tr>" : ""),
+        "<tr class='details-row'><td class='details-label'>Tombola tickets</td><td class='details-value'>$tombola</td></tr>",
+        "<tr class='details-row'><td class='details-label'>Dietary preferences</td><td class='details-value'>$(isempty(strip(dietary)) ? "None" : dietary)</td></tr>",
+        (show_bus ? "<tr class='details-row'><td class='details-label'>Bus return time</td><td class='details-value'>$bus_return</td></tr>" : "")
+    ]
+
+    details_html = """
+    <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
+      <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">Your Registration Details</h3>
+      <table class="details-table">
+        $(join(details_rows, "\n"))
+      </table>
+    </div>
+    """
+
+    # ==========================
+    # 7 — FULL PAGE CONTENT
+    # ==========================
+    content = """
+    <div class="content">
+      <style>
+        .content {
+          text-align: center;
+          max-width: 900px;
+          margin: 40px auto 32px;
+          color: #fff;
+          font-family: Arial, sans-serif;
+        }
+        h1 { font-size:2.4rem; font-weight:800; color:#FFA500; }
+        h2 { font-size:1.35rem; color:#FFA500; margin-top:26px; }
+
+        .info-box {
+          background: rgba(255,255,255,0.07);
+          padding: 22px;
+          border-radius: 14px;
+          margin: 20px auto;
+          max-width: 760px;
+          text-align: left;
+          font-size: 1.05rem;
+          line-height: 1.65;
+          box-shadow: 0 12px 32px rgba(0,0,0,.25);
+        }
+
+        /* Responsive details table */
+        .details-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 12px;
+        }
+
+        .details-row {
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .details-label {
+          color: rgba(255,255,255,0.75);
+          font-size: 0.95rem;
+          padding-right: 10px;
+          white-space: nowrap;
+          width: 40%;
+        }
+
+        .details-value {
+          text-align: right;
+          font-weight: 600;
+          color: #fff;
+        }
+
+        @media (max-width: 480px) {
+          .details-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 0;
+          }
+          .details-label {
+            padding: 0; margin-bottom:2px;
+          }
+          .details-value {
+            text-align: left;
+            font-size: 1.05rem;
+          }
+        }
+      </style>
+
+      <h1>Your Registration</h1>
+
+      $greeting_html
+
+      <h2>Your Entry QR</h2>
+
+      <!-- CLICKABLE QR -->
+      <div onclick="openQRModal()" style="cursor:pointer; display:inline-block;">
+        $entry_qr_inner
+        <div style="margin-top:6px; font-size:0.9rem; color:#ccc;">
+          (tap to enlarge)
+        </div>
+      </div>
+
+      <!-- FULLSCREEN QR MODAL -->
+      <div id="qrModal" 
+          style="
+              display:none;
+              position:fixed; top:0; left:0; right:0; bottom:0;
+              background:rgba(0,0,0,0.95);
+              z-index:9999;
+              justify-content:center;
+              align-items:center;
+              box-shadow:0 0 40px rgba(255,165,0,0.7);
+          "
+          onclick="closeQRModal()"
+      >
+        <img src="data:image/png;base64,$qr_b64"
+            style="
+              width:90vw; max-width:520px; height:auto;
+              background:white; padding:20px; border-radius:20px;
+            ">
+      </div>
+
+      <script>
+      async function openQRModal() {
+        const modal = document.getElementById('qrModal');
+        modal.style.display = 'flex';
+
+        try {
+          if ('wakeLock' in navigator)
+            window._brightnessLock = await navigator.wakeLock.request('screen');
+        } catch(e){}
+
+        document.documentElement.style.filter = "brightness(150%)";
+      }
+
+      function closeQRModal() {
+        const modal = document.getElementById('qrModal');
+        modal.style.display = 'none';
+
+        document.documentElement.style.filter = "";
+
+        try {
+          if (window._brightnessLock) {
+            window._brightnessLock.release();
+            window._brightnessLock = null;
+          }
+        } catch(e){}
+      }
+      </script>
+
+      $details_html
+
+    </div>
+    """
+
+    return layout("Registration Confirmation", content)
+end
 
 
 Genie.config.server_host = "0.0.0.0"   # listen on all interfaces
