@@ -1481,7 +1481,7 @@ route("/theevent") do
     </ul>
 
     <p style="margin-top:18px; color:#ddd;">
-      Questions? contact us: <a href="mailto:bal@177pol.rma.ac.be">bal@177pol.rma.ac.be</a>
+      Questions? contact us: <a href="mailto:erm-177pol-balpolytechniek@mil.be">Our service mailbox :)</a>
     </p>
   </div>
 
