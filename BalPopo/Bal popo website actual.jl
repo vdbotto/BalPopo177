@@ -496,7 +496,7 @@ route("/Registration", method = POST) do
 
       # ------ Load logo for entry QR overlay ------
       logo_path  = "BalPopo/static/logo_dark.png"
-      logo_b64 = logo_base64_data(logo_path)
+      logo_b64 = logo_base64_data(cd_path*logo_path)
 
       # ------ Build HTML for entry QR (hidden behind button) ------
       entry_qr_inner = """
