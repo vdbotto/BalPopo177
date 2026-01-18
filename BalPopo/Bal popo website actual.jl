@@ -42,7 +42,7 @@ end
 
 
 function layout(title, content; background_css = "")
-  favico = logo_base64_data("BalPopo/static/logo_dark.png")
+  favico = logo_base64_data(cd_path*"BalPopo/static/logo_dark.png")
 
   event_jsonld = raw"""
   <script type="application/ld+json">
@@ -85,10 +85,10 @@ function layout(title, content; background_css = "")
   }
   </script>
   """
-  banner = logo_base64_data("BalPopo/static/couverture_facebook-removebg.png")
-  bg = create_long_background("BalPopo/static/orange_black.png", repetitions=4)
+  banner = logo_base64_data(cd_path*"BalPopo/static/couverture_facebook-removebg.png")
+  bg = create_long_background(cd_path*"BalPopo/static/orange_black.png", repetitions=4)
 
-  spinner_b64 = logo_base64_data("BalPopo/static/background2.png")
+  spinner_b64 = logo_base64_data(cd_path*"BalPopo/static/background2.png")
 
   html("""
     <!DOCTYPE html>
@@ -284,7 +284,7 @@ function layout(title, content; background_css = "")
       </main>
 
       <footer>
-        <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/logo_white.png"))" alt="Logo">
+        <img src="data:image/png;base64,$(logo_base64_data(cd_path*"BalPopo/static/logo_white.png"))" alt="Logo">
         <span>Ball Popo 177 —</span>
         <a href="/legal">Legal</a> |
         <a href="/contact">Contact</a> |
@@ -517,8 +517,8 @@ route("/Registration", method = POST) do
 
       # ------ Build HTML for payment QR (visible) ------
       pay_qr_html = isempty(pay_qr_b64) ? "" : "<img src=\"data:image/png;base64,$pay_qr_b64\" alt=\"Payment QR\" style=\"max-width:420px; width:100%; height:auto; border:6px solid #fff; border-radius:8px; background:#fff;\">"
-      scan_symbol = logo_base64_data("BalPopo/static/scan_symbol_QR.png")
-      banklogos = logo_base64_data("BalPopo/static/BankLogos_Belgium_5icons.png")
+      scan_symbol = logo_base64_data(cd_path*"BalPopo/static/scan_symbol_QR.png")
+      banklogos = logo_base64_data(cd_path*"BalPopo/static/BankLogos_Belgium_5icons.png")
 
       # ------ Final  ------
       return layout("Registration Submitted", """
@@ -705,7 +705,7 @@ route("/Registration", method = POST) do
 end
 
 route("/Registration", method = GET) do
-  Captcha = logo_base64_data("BalPopo/static/Captcha.jpg")
+  Captcha = logo_base64_data(cd_path*"BalPopo/static/Captcha.jpg")
   content = """
     <style>
     form {
@@ -1072,8 +1072,8 @@ end
 
 
 route("/crook") do
-    img_shuffle = logo_base64_data("BalPopo/static/Shuffle.jpg")
-    img_sodexo  = logo_base64_data("BalPopo/static/Sodexo.jpg")
+    img_shuffle = logo_base64_data(cd_path*"BalPopo/static/Shuffle.jpg")
+    img_sodexo  = logo_base64_data(cd_path*"BalPopo/static/Sodexo.jpg")
 
     layout("Crookpagina", """
     <div class="hero" style="text-align:center; padding:50px 20px;">
@@ -1101,7 +1101,7 @@ route("/crook") do
 end
 
 route("/") do
-  firstpic = background_base64_data("BalPopo/static/Fakkelparade 179.jpg")
+  firstpic = background_base64_data(cd_path*"BalPopo/static/Fakkelparade 179.jpg")
 
   # Main section: text on left, placeholder image on right
   content = """
@@ -1229,7 +1229,7 @@ route("/") do
       <div class="left">
           <hkwn>
             WELCOME TO BALL POPO
-            <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/logo_white.png"))"
+            <img src="data:image/png;base64,$(logo_base64_data(cd_path*"BalPopo/static/logo_white.png"))"
                 alt="Ball Popo logo"
                 class="text-logo">
           </hkwn>
@@ -1238,10 +1238,10 @@ route("/") do
           <button class="button" onclick="location.href='/theevent'">The Event</button>
           <div class="social-icons">
               <a href="https://fb.me/e/3pklOfDoj" target="_blank">
-                  <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
+                  <img src="data:image/png;base64,$(logo_base64_data(cd_path*"BalPopo/static/icons8-facebook-100.png"))" alt="Facebook">
               </a>
               <a href="https://www.instagram.com/ballpolytechnic177/" target="_blank">
-                  <img src="data:image/png;base64,$(logo_base64_data("BalPopo/static/icons8-instagram-96.png"))" alt="Instagram">
+                  <img src="data:image/png;base64,$(logo_base64_data(cd_path*"BalPopo/static/icons8-instagram-96.png"))" alt="Instagram">
               </a>
           </div>
         </div>
@@ -1269,12 +1269,12 @@ route("/") do
 end
 
 route("/sponsors") do
-  data1 = logo_base64_data("BalPopo/static/LogoSeyntex.png")
-  data2 = logo_base64_data("BalPopo/static/LogoOIP.png")
-  data3 = logo_base64_data("BalPopo/static/logoBAE.jpg")
+  data1 = logo_base64_data(cd_path*"BalPopo/static/LogoSeyntex.png")
+  data2 = logo_base64_data(cd_path*"BalPopo/static/LogoOIP.png")
+  data3 = logo_base64_data(cd_path*"BalPopo/static/logoBAE.jpg")
   data6 = logo_base64_data_from_url("https://raw.githubusercontent.com/vdbotto/BalPopo177/main/BalPopo/static/skydive-spa-logo.jpg")
-  data4 = logo_base64_data("BalPopo/static/Logo ABAL.png")
-  data5 = logo_base64_data("BalPopo/static/KULEUVEN_RGB_LOGO.png")
+  data4 = logo_base64_data(cd_path*"BalPopo/static/Logo ABAL.png")
+  data5 = logo_base64_data(cd_path*"BalPopo/static/KULEUVEN_RGB_LOGO.png")
 
   content = """
   <div class="content">
@@ -1565,7 +1565,7 @@ end
 # New simplified placeholder route
 route("/theevent") do
 # Load the under construction image as base64
-uc_img = logo_base64_data("BalPopo/static/under_construction2.jpg")
+uc_img = logo_base64_data(cd_path*"BalPopo/static/under_construction2.jpg")
 
 # Simple content with the image centered
 content = """
@@ -1965,14 +1965,14 @@ route("/Privacy policy") do
   layout("Privacy policy", content)
 end
 
-const IMG1 = logo_base64_data("BalPopo/static/story1.jpeg")
-const IMG2 = logo_base64_data("BalPopo/static/story2.jpeg")
-const IMG3 = logo_base64_data("BalPopo/static/story3.jpeg")
-# const IMG4 = logo_base64_data("BalPopo/static/Rodeo.jpg")
-const IMG5 = logo_base64_data("BalPopo/static/Paintball1Ba.jpg")
-const IMG6 = logo_base64_data("BalPopo/static/Budapest2.jpg")
-const IMG7 = logo_base64_data("BalPopo/static/Frigate2.jpg")
-const IMG8 = logo_base64_data("BalPopo/static/Budapest3.jpg")
+const IMG1 = logo_base64_data(cd_path*"BalPopo/static/story1.jpeg")
+const IMG2 = logo_base64_data(cd_path*"BalPopo/static/story2.jpeg")
+const IMG3 = logo_base64_data(cd_path*"BalPopo/static/story3.jpeg")
+# const IMG4 = logo_base64_data(cd_path*"BalPopo/static/Rodeo.jpg")
+const IMG5 = logo_base64_data(cd_path*"BalPopo/static/Paintball1Ba.jpg")
+const IMG6 = logo_base64_data(cd_path*"BalPopo/static/Budapest2.jpg")
+const IMG7 = logo_base64_data(cd_path*"BalPopo/static/Frigate2.jpg")
+const IMG8 = logo_base64_data(cd_path*"BalPopo/static/Budapest3.jpg")
 
 route("/ourstory") do
   content = """
@@ -2627,7 +2627,7 @@ route("/registration/confirmation/:raw", method = GET) do
         qr_b64 = ""
     end
 
-    logo_b64 = logo_base64_data("BalPopo/static/logo_dark.png")
+    logo_b64 = logo_base64_data(cd_path*"BalPopo/static/logo_dark.png")
 
     entry_qr_inner = """
     <div style="display:flex; justify-content:center; align-items:center;">
