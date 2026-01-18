@@ -347,7 +347,7 @@ bytes = UInt8[(b ⊻ key) for b in raw]
 return String(bytes)
 end
 
-const CSV_FILE = "BalPopo/registrations.csv"  # stored in the same folder as your app
+const CSV_FILE = cd_path*"BalPopo/registrations.csv"  # stored in the same folder as your app
 if !isfile(CSV_FILE)
   df = DataFrame([
     "Timestamp",
