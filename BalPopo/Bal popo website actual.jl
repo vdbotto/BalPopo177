@@ -2611,7 +2611,7 @@ route("/registration/confirmation/:raw", method = GET) do
 
     # Bus sentence
     bus_sentence = show_bus_info ?
-        "You can take the bus at 18:30 in front of the RMA (Renaissancelaan)." :
+        "Please check again here later for the bus schedule and pick-up point." :
         ""
 
     # ==========================
