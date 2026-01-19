@@ -1081,7 +1081,7 @@ route("/crook") do
     </div>
 
     <div class="content" style="text-align:center; padding:30px;">
-      <h1>Geheime pagina gevonden</h1>
+      <h1>Geheime pagina gevonden !!</h1>
       <p>U bent op de geheime pagina. Indien u SSMW bent ⇒ buiten!</p>
       <p style="margin-top:15px;">Meet your organiser:</p>
 
