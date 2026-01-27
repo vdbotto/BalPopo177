@@ -1097,6 +1097,102 @@ route("/Registration", method = GET) do
   layout("Registration", content)
 end
 
+#= AFTER 5 FEB
+route("/Registration", method = GET) do
+    content = """
+    <style>
+      .closed-wrapper {
+        text-align: center;
+        max-width: 900px;
+        margin: 60px auto;
+        padding: 20px;
+        color: #fff;
+      }
+
+      .closed-wrapper h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        color: #FFA500;
+        margin-bottom: 18px;
+      }
+
+      .closed-wrapper p {
+        font-size: 1.25rem;
+        line-height: 1.75;
+        color: #f0f0f0;
+        margin-bottom: 18px;
+      }
+
+      .closed-logo {
+        width: 150px;
+        margin: 20px auto 35px;
+        display: block;
+        opacity: 0.95;
+        filter: drop-shadow(0 0 12px rgba(255,165,0,0.4));
+      }
+
+      .home-btn {
+        margin-top: 20px;
+        padding: 14px 30px;
+        font-size: 1.2rem;
+        border: 2px solid #FFA500;
+        background: transparent;
+        color: #FFA500;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.25s ease;
+        font-weight: 600;
+      }
+
+      .home-btn:hover {
+        background: #FFA500;
+        color: #111;
+      }
+
+      /* MOBILE */
+      @media (max-width: 480px) {
+        .closed-wrapper {
+          margin: 40px 18px;
+        }
+        .closed-wrapper h1 {
+          font-size: 2rem;
+        }
+        .closed-wrapper p {
+          font-size: 1.1rem;
+        }
+        .closed-logo {
+          width: 120px;
+        }
+      }
+    </style>
+
+    <div class="closed-wrapper">
+      <img class="closed-logo"
+           src="data:image/png;base64,$(logo_base64_data(cd_path*"BalPopo/static/logo_white.png"))"
+           alt="Ball Popo logo">
+
+      <h1>Registrations Are Closed</h1>
+
+      <p>
+        Thank you very much for your interest in <strong>Ball Popo 177</strong>.<br>
+        Registrations officially closed on  
+        <strong>5 February at 12:00 (noon)</strong>.
+      </p>
+
+      <p>
+        We look forward to welcoming everyone who registered.<br>
+        If you were unable to register in time, we hope to see you at a future edition!
+      </p>
+
+      <button class="home-btn" onclick="window.location.href='/'">
+        Return to Home
+      </button>
+    </div>
+    """
+
+    layout("Registrations Closed", content)
+end
+=#
 
 route("/crook") do
     img_shuffle = logo_base64_data(cd_path*"BalPopo/static/Shuffle.jpg")
