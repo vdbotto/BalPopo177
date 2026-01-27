@@ -131,6 +131,28 @@ function layout(title, content; background_css = "")
               user-select: none;
             }
 
+            .last-chance {
+              background: #FFA500;          /* theme orange */
+              color: #111;                  /* readable on orange */
+              font-size: 0.65rem;
+              padding: 2px 6px;
+              border-radius: 6px;
+              margin-left: 6px;
+              font-weight: 700;
+              white-space: nowrap;
+              animation: last-pulse 1.6s infinite ease-in-out;
+              box-shadow: 0 0 0 rgba(255,165,0,0.0);
+            }
+
+            @keyframes last-pulse {
+              0%   { box-shadow: 0 0 0 rgba(255,165,0,0.0); }
+              50%  { box-shadow: 0 0 10px rgba(255,165,0,0.9); }
+              100% { box-shadow: 0 0 0 rgba(255,165,0,0.0); }
+            }
+
+            /* Keep nav alignment tidy if badges wrap on very small screens */
+            nav a { display: inline-flex; align-items: center; gap: 6px; }
+
             #page-loader {
               position: fixed;
               top: 0;
@@ -263,7 +285,7 @@ function layout(title, content; background_css = "")
         <nav class="nav-links">
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
-          <a href="/Registration">Registration</a>
+          <a href="/Registration">Registration <span class="last-chance">Last chance!</span></a>
           <a href="/theevent">The Event</a>
           <a href="/ourstory">Our Story</a>
         </nav>
@@ -273,7 +295,7 @@ function layout(title, content; background_css = "")
         <nav class="mobile-menu">
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
-          <a href="/Registration">Registration</a>
+          <a href="/Registration">Registration <span class="last-chance">Last chance!</span></a>
           <a href="/theevent">The Event</a>
           <a href="/ourstory">Our Story</a>
         </nav>
@@ -825,6 +847,11 @@ route("/Registration", method = GET) do
 
   <div class="content">
   <h1>Registration Form</h1>
+
+<p style="text-align:center; color:#FFA500; font-weight:600; margin-top:-10px; margin-bottom:25px; font-size:1.1rem;">
+  ⚠️ Registrations close on <strong>5 February at 12:00 (noon)</strong>.
+</p>
+
   <form id="registrationForm" method="post" action="/Registration">
 
     <div class="row">
@@ -2055,361 +2082,178 @@ route("/ourstory") do
   layout("Our Story", content)
 end
 
-#= GET route (unchanged)
-route("/admin/checkin", method = GET) do
-content = """
-<div class="content">
-  <h1>Admin: Check-in / Decode QR code</h1>
-  <p>This page decodes the encrypted code stored in the QR and can mark the matching registration <strong>paid</strong> in the CSV.</p>
-
-  <form method="post" action="/admin/checkin">
-    <label for="admin_key">Admin key (if set):</label><br/>
-    <input type="password" id="admin_key" name="admin_key" style="width:100%; padding:8px; margin:6px 0;"><br/>
-
-    <label for="code">Scanned code (paste the QR text or the code):</label><br/>
-    <input type="text" id="code" name="code" style="width:100%; padding:8px; margin:6px 0;" required><br/>
-
-    <button type="submit" style="background:#FFA500;padding:10px 14px;border-radius:6px;border:none;cursor:pointer;">Decode / Check</button>
-  </form>
-
-  <p style="margin-top:16px; color:#ccc;">
-    Note: set <code>ENV["ADMIN_KEY"]</code> to protect this page.
-  </p>
-</div>
-"""
-layout("Admin check-in", content)
-end
-
-# Corrected POST route (fixed string building to avoid the parse error)
-route("/admin/checkin", method = POST) do
-try
-  data = params()
-  safe_get = key -> begin
-      v = get(data, Symbol(key), nothing)
-      v === nothing ? "" : String(v)
-  end
-
-  provided_key = safe_get("admin_key")
-  provided_code = strip(safe_get("code"))
-  action_mark = safe_get("mark")  # present when the user clicked "Mark as paid"
-
-  env_key = get(ENV, "ADMIN_KEY", "")
-
-  # If an ADMIN_KEY is configured, require it
-  if !isempty(env_key) && provided_key != env_key
-      return layout("Forbidden", "<div class=\"content\"><h1>Forbidden</h1><p>Invalid admin key.</p></div>")
-  end
-
-  if isempty(provided_code)
-      return layout("Check-in", "<div class=\"content\"><p>No code provided.</p></div>")
-  end
-
-  # Attempt decryption using existing helper
-  decoded = ""
-  ok_decode = true
-  try
-    decoded = xor_decrypt_base64(provided_code)   # uses existing function in your file
-  catch e
-    ok_decode = false
-    decoded = string("Decoding error: ", sprint(showerror, e))
-  end
-
-  decoded_fields = ["(invalid)","(invalid)","(invalid)"]
-  if ok_decode
-    parts = split(decoded, "||")
-    for i in 1:3
-      decoded_fields[i] = i <= length(parts) ? parts[i] : ""
-    end
-  end
-
-  # Read CSV and find matching registration (uniqueCode column)
-  found_idx = nothing
-  found_row_html = ""
-  paid_before = "(unknown - CSV missing)"
-  match_count = 0
-  df = nothing
-  try
-    if isfile(CSV_FILE)
-      df = CSV.read(CSV_FILE, DataFrame)
-
-      if :uniqueCode in names(df)
-        matches = findall(x -> !ismissing(x) && String(x) == provided_code, df[!, :uniqueCode])
-        match_count = length(matches)
-        if match_count > 0
-          found_idx = matches[1]
-          # prepare values in a safe way (avoid indexing errors)
-          row = df[found_idx, :]
-
-          ts = try string(row[:timestamp]) catch; "" end
-          fname = try string(row[:firstName]) catch; "" end
-          lname = try string(row[:lastName]) catch; "" end
-          fullname = strip((isempty(fname) ? "" : fname * " ") * lname)
-          package = try string(row[:package]) catch; "" end
-          email = try string(row[:email]) catch; "" end
-          phone = try string(row[:phone]) catch; "" end
-          pref = (:paymentRef in names(df)) ? string(df[found_idx, :paymentRef]) : ""
-          paid_before = (:paid in names(df)) ? string(df[found_idx, :paid]) : "(no paid column)"
-
-          # Build the HTML table safely (no inline ternary inside interpolation)
-          found_row_html = "<h3>Matched registration (first match)</h3><ul>" *
-                          "<li><strong>Timestamp:</strong> " * escape_html(ts) * "</li>" *
-                          "<li><strong>Name:</strong> " * escape_html(fullname) * "</li>" *
-                          "<li><strong>Package:</strong> " * escape_html(package) * "</li>" *
-                          "<li><strong>Email:</strong> " * escape_html(email) * "</li>" *
-                          "<li><strong>Phone:</strong> " * escape_html(phone) * "</li>" *
-                          "<li><strong>paymentRef:</strong> " * escape_html(pref) * "</li>" *
-                          "<li><strong>paid:</strong> " * escape_html(paid_before) * "</li>" *
-                          "</ul>"
-        else
-          found_row_html = "<p>No matching registration found in $(CSV_FILE) for this code.</p>"
-        end
-      else
-        found_row_html = "<p>CSV does not contain a <code>uniqueCode</code> column.</p>"
-      end
-    else
-      found_row_html = "<p>CSV file not found: <code>$(CSV_FILE)</code></p>"
-    end
-  catch e
-    found_row_html = "<p>Error reading CSV: $(sprint(showerror,e))</p>"
-  end
-
-  # If the admin asked to mark paid and we have a match -> update CSV
-  mark_result_html = ""
-  if !isempty(action_mark) && found_idx !== nothing && df !== nothing
-    try
-      # ensure :paid exists
-      if !(:paid in names(df))
-        df[!, :paid] = fill("false", nrow(df))
-      end
-      df[found_idx, :paid] = "true"
-      CSV.write(CSV_FILE, df)  # rewrite CSV
-      mark_result_html = "<p style=\"color:lightgreen;\"><strong>Marked as paid (and CSV updated).</strong></p>"
-    catch e
-      mark_result_html = "<p style=\"color:salmon;\"><strong>Failed to mark as paid:</strong> $(sprint(showerror,e))</p>"
-    end
-  end
-
-  # Build result page: decoded payload + matched row + optional mark button
-    decoded_pretty = ok_decode ? """
-    <h2>Decoded payload</h2>
-    <ul>
-      <li><strong>Full name:</strong> $(escape_html(decoded_fields[1]))</li>
-      <li><strong>Plus-one:</strong> $(escape_html(decoded_fields[2]))</li>
-      <li><strong>Selected package:</strong> $(escape_html(decoded_fields[3]))</li>
-      <li><strong>Tombola tickets:</strong> $(escape_html(decoded_fields[4]))</li>
-    </ul>
-    """ : "<p style=\"color:salmon;\">$(escape_html(decoded))</p>"
-
-
-  mark_form = ""
-  if found_idx !== nothing
-    mark_form = """
-      <form method="post" action="/admin/checkin" style="margin-top:12px;">
-        <input type="hidden" name="admin_key" value="$(escape_html(provided_key))">
-        <input type="hidden" name="code" value="$(escape_html(provided_code))">
-        <input type="hidden" name="mark" value="1">
-        <button type="submit" style="background:#28a745;color:white;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">
-          Mark registration as PAID
-        </button>
-      </form>
-    """
-  end
-
-  content = """
-  <div class="content">
-    <h1>Check-in result</h1>
-    <p><strong>Provided code:</strong> <code>$(escape_html(provided_code))</code></p>
-    $decoded_pretty
-    <h2>CSV match</h2>
-    <p>Matches found in CSV: <strong>$(match_count)</strong></p>
-    $found_row_html
-    $mark_result_html
-    $mark_form
-
-    <p style="margin-top:18px; color:#bbb;">If you mark paid, the CSV file <code>$(CSV_FILE)</code> will be updated immediately.</p>
-  </div>
-  """
-
-  return layout("Check-in result", content)
-
-catch e
-  @error "Admin checkin error" exception=(e, catch_backtrace())
-  return layout("Error", "<p>There was an error: $(sprint(showerror,e))</p>")
-end
-end
-=#
 route("/admin/scan") do
-scan_page = raw"""
-<div class="content">
-  <h1>Scan QR — Admin scanner</h1>
-  <p>Point your phone camera at the QR. The scanner decrypts locally and will automatically check payment status. 
-  Border: <span style="font-weight:bold">green = paid, red = not paid / invalid</span>.</p>
+  scan_page = raw"""
+  <div class="content">
+    <h1>Scan QR — Admin scanner</h1>
+    <p>Point your phone camera at the QR. The scanner decrypts locally and will automatically check payment status. 
+    Border: <span style="font-weight:bold">green = paid, red = not paid / invalid</span>.</p>
 
-  <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;">
-    <div style="flex:1; min-width:260px;">
-      <video id="video" playsinline autoplay style="width:100%; border-radius:8px; border:6px solid #fff; background:#000;"></video>
-      <canvas id="canvas" class="hidden" style="display:none;"></canvas>
-      <div style="margin-top:8px;">
-        <button id="startBtn" style="background:#FFA500;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">Start camera</button>
-        <button id="stopBtn" style="background:#999;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">Stop</button>
-      </div>
-    </div>
-
-    <div style="flex:1; min-width:260px;">
-      <label><strong>Encrypted code (from QR):</strong></label>
-      <textarea id="encrypted" rows="3" style="width:100%; padding:8px; font-family:monospace;" readonly></textarea>
-
-      <label style="margin-top:8px;"><strong>Decrypted fields:</strong></label>
-      <div id="decoded" style="background:#111; padding:10px; border-radius:6px; color:#ddd; min-height:88px; white-space:pre-wrap;"></div>
-
-      <div style="margin-top:10px;">
-        <button id="copyBtn" style="background:#444;color:white;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;margin-left:8px;">Copy encrypted</button>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+      <div style="flex:1; min-width:260px;">
+        <video id="video" playsinline autoplay style="width:100%; border-radius:8px; border:6px solid #fff; background:#000;"></video>
+        <canvas id="canvas" class="hidden" style="display:none;"></canvas>
+        <div style="margin-top:8px;">
+          <button id="startBtn" style="background:#FFA500;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">Start camera</button>
+          <button id="stopBtn" style="background:#999;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;">Stop</button>
+        </div>
       </div>
 
-      <div style="margin-top:8px;">
-        <div id="statusBox" style="margin-top:8px; font-weight:bold; font-size:1.05rem;"></div>
+      <div style="flex:1; min-width:260px;">
+        <label><strong>Encrypted code (from QR):</strong></label>
+        <textarea id="encrypted" rows="3" style="width:100%; padding:8px; font-family:monospace;" readonly></textarea>
+
+        <label style="margin-top:8px;"><strong>Decrypted fields:</strong></label>
+        <div id="decoded" style="background:#111; padding:10px; border-radius:6px; color:#ddd; min-height:88px; white-space:pre-wrap;"></div>
+
+        <div style="margin-top:10px;">
+          <button id="copyBtn" style="background:#444;color:white;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;margin-left:8px;">Copy encrypted</button>
+        </div>
+
+        <div style="margin-top:8px;">
+          <div id="statusBox" style="margin-top:8px; font-weight:bold; font-size:1.05rem;"></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- jsQR CDN -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <!-- jsQR CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-<script>
-// Hard-coded valid encrypted codes
-const VALID_CODES = new Set([
-  "8N3UydDf1dTDkfrEyMHUw8LNzeXY3N_QkeXQx9TD39jUw83N1dDf0tTu1djf39TDzc2B",
-  "89TfkefQ35HixdTU39XQ3M3Nzc3V0N_S1O7V2N_f1MPNzYE"
-]);
+  <script>
+  // Hard-coded valid encrypted codes
+  const VALID_CODES = new Set([
+    "8N3UydDf1dTDkfrEyMHUw8LNzeXY3N_QkeXQx9TD39jUw83N1dDf0tTu1djf39TDzc2B",
+    "89TfkefQ35HixdTU39XQ3M3Nzc3V0N_S1O7V2N_f1MPNzYE"
+  ]);
 
-function xor_decrypt_base64_js(enc, key = 177) {
-  if (!enc) return "";
-  let s = enc.replace(/-/g, "+").replace(/_/g, "/");
-  let pad = (4 - (s.length % 4)) % 4;
-  s += "=".repeat(pad);
-  let bin = atob(s);
-  let bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  for (let i = 0; i < bytes.length; i++) bytes[i] = bytes[i] ^ key;
-  let decoder = new TextDecoder("utf-8");
-  return decoder.decode(bytes);
-}
-
-function escape_html_js(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
-}
-
-window.addEventListener('DOMContentLoaded', function () {
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const encryptedEl = document.getElementById('encrypted');
-  const decodedEl = document.getElementById('decoded');
-  const copyBtn = document.getElementById('copyBtn');
-  const statusBox = document.getElementById('statusBox');
-
-  let stream = null;
-  let scanning = false;
-  let scanInterval = null;
-  let lastSeen = "";
-
-  async function startCamera() {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-      video.srcObject = stream;
-      await video.play();
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      scanning = true;
-      scanLoop();
-    } catch (e) {
-      console.error("Camera access failed:", e && e.message ? e.message : e);
-    }
+  function xor_decrypt_base64_js(enc, key = 177) {
+    if (!enc) return "";
+    let s = enc.replace(/-/g, "+").replace(/_/g, "/");
+    let pad = (4 - (s.length % 4)) % 4;
+    s += "=".repeat(pad);
+    let bin = atob(s);
+    let bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = bytes[i] ^ key;
+    let decoder = new TextDecoder("utf-8");
+    return decoder.decode(bytes);
   }
 
-  function stopCamera() {
-    scanning = false;
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-    }
-    if (scanInterval) {
-      clearTimeout(scanInterval);
-      scanInterval = null;
-    }
+  function escape_html_js(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
   }
 
-  function handleNewCode(code) {
-    encryptedEl.value = code;
-    try {
-      const dec = xor_decrypt_base64_js(code, 177);
-      const parts = dec.split("||");
-      decodedEl.innerHTML =
-          "<strong>Full name:</strong> " + escape_html_js(parts[0] || "") +
-          "<br/><strong>Plus-one:</strong> " + escape_html_js(parts[1] || "") +
-          "<br/><strong>Selected package:</strong> " + escape_html_js(parts[2] || "") +
-          "<br/><strong>Tombola tickets:</strong> " + escape_html_js(parts[3] || "");
+  window.addEventListener('DOMContentLoaded', function () {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const encryptedEl = document.getElementById('encrypted');
+    const decodedEl = document.getElementById('decoded');
+    const copyBtn = document.getElementById('copyBtn');
+    const statusBox = document.getElementById('statusBox');
 
-    } catch (e) {
-      decodedEl.textContent = "Decryption failed";
-    }
+    let stream = null;
+    let scanning = false;
+    let scanInterval = null;
+    let lastSeen = "";
 
-    // Check directly against hardcoded set
-    if (VALID_CODES.has(code)) {
-      statusBox.style.color = "lightgreen";
-      statusBox.textContent = "PAID ✓";
-      document.documentElement.style.border = "8px solid #28a745"; // green
-    } else {
-      statusBox.style.color = "salmon";
-      statusBox.textContent = "NOT PAID ✗";
-      document.documentElement.style.border = "8px solid #d9534f"; // red
-    }
-  }
-
-  function scanLoop() {
-    if (!scanning) return;
-    try {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      let code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
-      if (code) {
-        if (code.data !== lastSeen) {
-          lastSeen = code.data;
-          handleNewCode(code.data);
-        }
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        video.srcObject = stream;
+        await video.play();
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        scanning = true;
+        scanLoop();
+      } catch (e) {
+        console.error("Camera access failed:", e && e.message ? e.message : e);
       }
-    } catch (e) {
-      console.error("scan error", e);
     }
-    scanInterval = setTimeout(scanLoop, 300);
-  }
 
-  startBtn.addEventListener('click', () => {
-    if (!scanning) startCamera();
-  });
-  stopBtn.addEventListener('click', () => {
-    stopCamera();
-  });
+    function stopCamera() {
+      scanning = false;
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      if (scanInterval) {
+        clearTimeout(scanInterval);
+        scanInterval = null;
+      }
+    }
 
-  copyBtn.addEventListener('click', () => {
-    const txt = encryptedEl.value;
-    if (!txt) return;
-    navigator.clipboard.writeText(txt).then(() => {
-      copyBtn.textContent = "Copied!";
-      setTimeout(()=> copyBtn.textContent = "Copy encrypted", 1200);
+    function handleNewCode(code) {
+      encryptedEl.value = code;
+      try {
+        const dec = xor_decrypt_base64_js(code, 177);
+        const parts = dec.split("||");
+        decodedEl.innerHTML =
+            "<strong>Full name:</strong> " + escape_html_js(parts[0] || "") +
+            "<br/><strong>Plus-one:</strong> " + escape_html_js(parts[1] || "") +
+            "<br/><strong>Selected package:</strong> " + escape_html_js(parts[2] || "") +
+            "<br/><strong>Tombola tickets:</strong> " + escape_html_js(parts[3] || "");
+
+      } catch (e) {
+        decodedEl.textContent = "Decryption failed";
+      }
+
+      // Check directly against hardcoded set
+      if (VALID_CODES.has(code)) {
+        statusBox.style.color = "lightgreen";
+        statusBox.textContent = "PAID ✓";
+        document.documentElement.style.border = "8px solid #28a745"; // green
+      } else {
+        statusBox.style.color = "salmon";
+        statusBox.textContent = "NOT PAID ✗";
+        document.documentElement.style.border = "8px solid #d9534f"; // red
+      }
+    }
+
+    function scanLoop() {
+      if (!scanning) return;
+      try {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+        if (code) {
+          if (code.data !== lastSeen) {
+            lastSeen = code.data;
+            handleNewCode(code.data);
+          }
+        }
+      } catch (e) {
+        console.error("scan error", e);
+      }
+      scanInterval = setTimeout(scanLoop, 300);
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (!scanning) startCamera();
     });
-  });
+    stopBtn.addEventListener('click', () => {
+      stopCamera();
+    });
 
-  window.addEventListener('pagehide', () => stopCamera());
-});
-</script>
-"""
-layout("Admin scanner", scan_page)
+    copyBtn.addEventListener('click', () => {
+      const txt = encryptedEl.value;
+      if (!txt) return;
+      navigator.clipboard.writeText(txt).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(()=> copyBtn.textContent = "Copy encrypted", 1200);
+      });
+    });
+
+    window.addEventListener('pagehide', () => stopCamera());
+  });
+  </script>
+  """
+  layout("Admin scanner", scan_page)
 end
 
 # a small set of valid codes
@@ -2421,47 +2265,47 @@ return uniqueCode in VALID_CODES
 end
 
 route("/admin/checkstatus", method = POST) do
-code = String(get(params(), :code, "")) |> strip
+  code = String(get(params(), :code, "")) |> strip
 
-decrypted = ""
-decode_success = true
-try
-    decrypted = xor_decrypt_base64(code) |> strip
-catch e
-    decrypted = "(invalid code)"
-    decode_success = false
-end
+  decrypted = ""
+  decode_success = true
+  try
+      decrypted = xor_decrypt_base64(code) |> strip
+  catch e
+      decrypted = "(invalid code)"
+      decode_success = false
+  end
 
-# Payment check = always on raw encrypted code
-paid = check_payment(code)
+  # Payment check = always on raw encrypted code
+  paid = check_payment(code)
 
-resp = Dict(
-    "ok" => true,                      # ✅ always true unless server crashed
-    "paid" => paid,
-    "match_count" => paid ? 1 : 0,
-    "paymentRef" => paid ? "REF_PLACEHOLDER" : "",
-    "decrypted" => decrypted,
-    "decode_success" => decode_success # optional extra info
-)
+  resp = Dict(
+      "ok" => true,                      # ✅ always true unless server crashed
+      "paid" => paid,
+      "match_count" => paid ? 1 : 0,
+      "paymentRef" => paid ? "REF_PLACEHOLDER" : "",
+      "decrypted" => decrypted,
+      "decode_success" => decode_success # optional extra info
+  )
 
-@info "checkstatus request" code=code decrypted=decrypted paid=paid decode_success=decode_success
+  @info "checkstatus request" code=code decrypted=decrypted paid=paid decode_success=decode_success
 
-content_type("application/json")
-return JSON.json(resp)
-end
+  content_type("application/json")
+  return JSON.json(resp)
+  end
 
 
-route("/admin/registrations", method = GET) do
-    content = """
-## Admin: View Registrations
+  route("/admin/registrations", method = GET) do
+      content = """
+  ## Admin: View Registrations
 
-Enter the admin password to view and download all registrations.
+  Enter the admin password to view and download all registrations.
 
-<form method="POST">
-  <input type="password" name="password" placeholder="Admin password" required>
-  <button type="submit">Access</button>
-</form>
-"""
+  <form method="POST">
+    <input type="password" name="password" placeholder="Admin password" required>
+    <button type="submit">Access</button>
+  </form>
+  """
     layout("Admin Registrations", content)
 end
 
@@ -2493,30 +2337,30 @@ route("/admin/registrations", method = POST) do
     end
 
  # Add Download Button
-buttons_html = """
-<style>
-.admin-btn {
-    display: inline-block;
-    padding: 14px 24px;
-    margin: 12px 8px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #ff6600;
-    border: none;
-    border-radius: 6px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.admin-btn:hover {
-    background-color: #e65c00;
-}
-</style>
+  buttons_html = """
+  <style>
+  .admin-btn {
+      display: inline-block;
+      padding: 14px 24px;
+      margin: 12px 8px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #ff6600;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+  }
+  .admin-btn:hover {
+      background-color: #e65c00;
+  }
+  </style>
 
-<div style="margin-top:20px;">
-    <a href="/admin/download_registrations" class="admin-btn">Download CSV</a>
-</div>
-"""
+  <div style="margin-top:20px;">
+      <a href="/admin/download_registrations" class="admin-btn">Download CSV</a>
+  </div>
+  """
 
 
     content = """
