@@ -6,7 +6,7 @@ cd_path = "/root/BalPopo177-main/"
 # CONFIG (NO const)
 # -----------------------------------------
 # CSV_FILE    = cd_path * "BalPopo/registrations.csv"       # master registrations
-CODES_FILE  = cd_path * "BalPopo/codes_to_send.csv"       # one raw code per line
+CODES_FILE  = "codes_to_send.csv"       # one raw code per line
 BASE_URL    = "https://balpol.rma.ac.be/registration/confirmation"
 MAIL_FROM   = "noreply@177pol.rma.ac.be"
 MAIL_SUBJECT = "Ball Popo 177 — Registration confirmation"
