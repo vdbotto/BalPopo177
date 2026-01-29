@@ -212,11 +212,7 @@ function main()
 
         enc_email = row[email_col]
         email = ""
-        try
-            email = xor_decrypt_base64(String(enc_email))
-        catch
-            email = String(enc_email)  # if it's already plain
-        end
+        email = xor_decrypt_base64(String(enc_email))
         email = strip(email)
 
         if isempty(email)
