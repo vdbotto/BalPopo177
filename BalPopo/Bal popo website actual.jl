@@ -50,7 +50,7 @@ function layout(title, content; background_css = "")
     "@context": "https://schema.org",
     "@type": "Event",
     "name": "Bal Popo 177",
-    "startDate": "2025-02-13T18:00",
+    "startDate": "2025-02-13T19:00",
     "endDate": "2025-02-13T23:59",
     "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
     "eventStatus": "https://schema.org/EventScheduled",
@@ -848,9 +848,9 @@ route("/Registration", method = GET) do
   <div class="content">
   <h1>Registration Form</h1>
 
-<p style="text-align:center; color:#FFA500; font-weight:600; margin-top:-10px; margin-bottom:25px; font-size:1.1rem;">
-  ⚠️ Registrations close on <strong>5 February at 12:00 (noon)</strong>.
-</p>
+  <p style="text-align:center; color:#FFA500; font-weight:600; margin-top:-10px; margin-bottom:25px; font-size:1.1rem;">
+    ⚠️ Registrations close on <strong>5 February at 12:00 (noon)</strong>.
+  </p>
 
   <form id="registrationForm" method="post" action="/Registration">
 
@@ -1515,38 +1515,85 @@ route("/sponsors") do
 end  
 
 route("/contact") do
-content = """
+  content = """
   <div class="content">
+    <style>
+      .content {
+        max-width: 860px;
+        margin: 50px auto;
+        padding: 0 20px;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: #FFA500;
+        margin-bottom: 16px;
+      }
+
+      .info-box {
+        background: rgba(255,255,255,0.07);
+        backdrop-filter: blur(6px);
+        padding: 26px;
+        border-radius: 16px;
+        max-width: 700px;
+        margin: 30px auto;
+        text-align: left;
+        font-size: 1.15rem;
+        line-height: 1.7;
+        box-shadow: 0 12px 32px rgba(0,0,0,.25);
+      }
+
+      .info-box p {
+        margin: 0 0 12px;
+        color: #ddd;
+      }
+
+      a {
+        color: #FFA500;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.25s;
+      }
+      a:hover {
+        color: #fff;
+        text-shadow: 0 0 12px #FFA500;
+      }
+
+      address {
+        margin-top: 18px;
+        font-style: normal;
+        line-height: 1.6;
+        color: #bbb;
+      }
+    </style>
+
     <h1>Contact</h1>
-    <p>General questions about the ball? Don't hesitate to contact us via e-mail:</p>
-    <p><a href="mailto:erm-177pol-balpolytechniek@mil.be">erm-177pol-balpolytechniek@mil.be</a></p>
 
-    <address>
-      Renaissancelaan 30<br>
-      1000 Brussel
-    </address>
+    <div class="info-box">
+      <p>
+        Questions about the Ball Popo 177, registration, buses or payments?<br>
+        Reach out to us — we're happy to help!
+      </p>
+
+      <p>
+        <a href="mailto:erm-177pol-balpolytechniek@mil.be">
+          erm-177pol-balpolytechniek@mil.be
+        </a>
+      </p>
+
+      <address>
+        Renaissancelaan 30<br>
+        1000 Brussel<br>
+        Royal Military Academy
+      </address>
+    </div>
   </div>
-
-  <style>
-    .content {
-      max-width: 700px;
-      margin: auto;
-      padding: 40px;
-      color: #f0f0f0;
-      line-height: 1.8em;
-      font-size: 1.2em;
-    }
-    a {
-      color: #ffd700;
-      text-decoration: underline;
-    }
-    address {
-      font-style: normal;
-      color: #ccc;
-    }
-  </style>
-"""
-layout("Contact", content)
+  """
+  layout("Contact", content)
 end
 
 
@@ -1562,7 +1609,7 @@ route("/theevent") do
       <!-- Info Card -->
       <div class="info-card">
         <h1>About the event</h1>
-        <p><strong>Date:</strong> 13 februari 2026 — 18:00</p>
+        <p><strong>Date:</strong> 13 februari 2026 — 19:00</p>
         <p><strong>Location:</strong> <a href="https://www.lafabbrica.be/en/" target="_blank" rel="noopener">La Fabbrica</a></p>
         <p><strong>Dresscode:</strong> Black tie (smocking, ball dresses and Gala/spencer for military)</p>
 
@@ -2485,6 +2532,66 @@ route("/admin/download_registrations", method = GET) do
     )
 end
 
+
+const SEATING_FILE = cd_path * "BalPopo/seating_preferences.csv"
+
+
+function ensure_seating_file()
+    if !isfile(SEATING_FILE)
+        open(SEATING_FILE, "w") do io
+            write(io, "raw,firstName,lastName,seating,timestamp\n")
+        end
+    end
+end
+
+
+
+function get_seating_pref(raw::AbstractString)
+    ensure_seating_file()
+    dfp = CSV.read(SEATING_FILE, DataFrame)
+    if !("raw" in names(dfp)) || !("seating" in names(dfp))
+        return ""
+    end
+    rkey = strip(raw)
+    m = findall(x -> !ismissing(x) && strip(String(x)) == rkey, dfp[!, "raw"])
+    if isempty(m)
+        return ""
+    end
+    val = dfp[m[end], "seating"]
+    return val === missing ? "" : strip(String(val))
+end
+
+
+
+function save_seating_pref(raw::AbstractString, pref::AbstractString; firstName::AbstractString="", lastName::AbstractString="")
+    ensure_seating_file()
+
+    # Already set? Then do nothing
+    existing = get_seating_pref(raw)
+    if !isempty(strip(existing))
+        return false
+    end
+
+    # Sanitize single-line CSV-safe values
+    sanitize = x -> replace(x, '\n' => ' ', '\r' => ' ', ',' => ';', '"' => '\'') |> strip
+    clean_pref  = sanitize(pref)
+    clean_first = sanitize(firstName)
+    clean_last  = sanitize(lastName)
+
+    if isempty(clean_pref)
+        return false
+    end
+
+    ts = Dates.format(Dates.now(), dateformat"yyyy-mm-ddTHH:MM:SS")
+    open(SEATING_FILE, "a") do io
+        write(io, "$(strip(raw)),$clean_first,$clean_last,$clean_pref,$ts\n")
+    end
+    return true
+end
+
+
+
+
 route("/registration/confirmation/:raw", method = GET) do
     raw = params(:raw) |> String |> strip
 
@@ -2541,6 +2648,13 @@ route("/registration/confirmation/:raw", method = GET) do
 
     show_bus_info = bus_service_raw == "yes"
 
+    hhmm = s -> begin
+        x = strip(String(s))
+        m = match(r"^(\d{1,2}):(\d{2})(?::\d{2})?$", x)
+        m === nothing ? x : lpad(m.captures[1], 2, '0') * ":" * m.captures[2]
+    end
+
+
     # ==========================
     # 3 — Package → arrival time
     # ==========================
@@ -2548,11 +2662,15 @@ route("/registration/confirmation/:raw", method = GET) do
     has_dinner = occursin("dinner", pkg_raw)
     pretty_package = has_dinner ? "Dinner + Dance (the better choice)" : "Dance"
     arrival_time = occursin("dinner", pkg_raw) ? "19:00" : "22:00"
+    seating_pref = get_seating_pref(raw)
 
     # Bus sentence
-    bus_sentence = show_bus_info ?
-        "Please check again here later for the bus schedule and pick-up point." :
-        ""
+    bus_sentence = ""
+    if show_bus_info
+        dep = has_dinner ? "18:25" : "21:25"
+        bus_sentence = "You can take the bus at $dep in front of the RMA."
+    end
+
 
     # ==========================
     # 4 — Rebuild Entry QR
@@ -2640,10 +2758,29 @@ route("/registration/confirmation/:raw", method = GET) do
             ""
         ),
         (show_bus ?
-            "<tr class='details-row'><td class='details-label'>Bus return time</td><td class='details-value'>$bus_return</td></tr>" :
+            "<tr class='details-row'><td class='details-label'>Bus return time</td><td class='details-value'>$(hhmm(bus_return))</td></tr>" :
+            ""
+        ),
+        (has_dinner && !isempty(strip(seating_pref)) ?
+            "<tr class='details-row'><td class='details-label'>Seating preference</td><td class='details-value'>$(seating_pref)</td></tr>" :
             ""
         )
     ]
+    seating_form_html = ""
+    if has_dinner && isempty(strip(seating_pref))
+        seating_form_html = """
+        &lt;div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;"&gt;
+          &lt;h3 style="margin-top:0; color:#fff; font-size:1.2rem;"&gt;Seating preference (optional)&lt;/h3&gt;
+          &lt;form method="post" action="/registration/confirmation/$raw/seating" style="margin-top:10px;"&gt;
+            &lt;textarea name="seatingPreference" maxlength="200"
+                      placeholder="If you have a specific request other than sitting with your promotion and/or plus one, please indicate it here."
+                      style="width:100%; min-height:64px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff; font-size:1rem;"&gt;&lt;/textarea&gt;
+            &lt;div style="color:#aaa; font-size:0.9rem; margin-top:6px;"&gt;Max 200 characters. You can submit this once.&lt;/div&gt;
+            &lt;button type="submit" style="margin-top:14px; padding:10px 18px; border:2px solid #FFA500; background:transparent; color:#FFA500; font-weight:600; border-radius:8px; cursor:pointer;"&gt;Save seating preference&lt;/button&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+        """
+    end
 
 
     details_html = """
@@ -2787,8 +2924,28 @@ route("/registration/confirmation/:raw", method = GET) do
         } catch(e){}
       }
       </script>
+    $details_html
+    $(
+      has_dinner && isempty(strip(seating_pref)) ? """
+      <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
+        <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">Seating preference</h3>
+        <form method="post" action="/registration/confirmation/$(escapeuri(raw))/seating" style="margin-top:10px;">
+          <textarea name="seatingPreference" maxlength="200"
+                    placeholder="If you have a specific request other than sitting with your promotion, please indicate it here."
+                    style="width:100%; min-height:64px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff; font-size:1rem;"></textarea>
+          <div style="color:#aaa; font-size:0.9rem; margin-top:6px;">Max 200 characters. You can submit this once before 12 February .</div>
+          <button type="submit" style="margin-top:14px; padding:10px 18px; border:2px solid #FFA500; background:transparent; color:#FFA500; font-weight:600; border-radius:8px; cursor:pointer;">
+            Save seating preference
+          </button>
+        </form>
+      </div>
+      """ : ""
+    )
 
-      $details_html
+
+        <div style="margin-top:6px; font-size:0.9rem; color:#ccc;">
+          Something wrong or not working? Contact us.
+        </div>
 
     </div>
     """
@@ -2796,6 +2953,61 @@ route("/registration/confirmation/:raw", method = GET) do
     return layout("Registration Confirmation", content)
 end
 
+using HTTP: escapeuri # crook shit
+
+route("/registration/confirmation/:raw/seating", method = POST) do
+    raw = params(:raw) |> String |> strip
+    pref = try
+        String(params(:seatingPreference)) |> strip
+    catch
+        ""
+    end
+
+    # Resolve first/last name from registrations CSV with robust header detection
+    firstName = ""
+    lastName  = ""
+    try
+        if isfile(CSV_FILE)
+            df = CSV.read(CSV_FILE, DataFrame)
+
+            # Helper to grab an existing column name from a list of aliases
+            find_col = (aliases::Vector{String}) -> begin
+                for a in aliases
+                    if a in names(df)
+                        return a
+                    end
+                end
+                return nothing
+            end
+
+            code_col = find_col(["Raw entry code", "uniqueCode"])
+            fn_col   = find_col(["First name","First Name","firstName","firstname"])
+            ln_col   = find_col(["Last name","Last Name","lastName","lastname"])
+
+            if code_col !== nothing
+                idx = findfirst(x -> !ismissing(x) && String(x) == raw, df[!, code_col])
+                if idx !== nothing
+                    if fn_col !== nothing
+                        v = df[idx, fn_col]
+                        firstName = v === missing ? "" : String(v)
+                    end
+                    if ln_col !== nothing
+                        v = df[idx, ln_col]
+                        lastName = v === missing ? "" : String(v)
+                    end
+                end
+            end
+        end
+    catch
+        # ignore; leave names empty if anything goes wrong
+    end
+
+    if !isempty(pref)
+        _ = save_seating_pref(raw, pref; firstName=firstName, lastName=lastName)
+    end
+
+    redirect("/registration/confirmation/$(escapeuri(raw))")
+end
 
 Genie.config.server_host = "0.0.0.0"   # listen on all interfaces
 Genie.config.server_port = 8000        # your chosen port
