@@ -1,6 +1,6 @@
 using CSV, DataFrames, Dates
 
-cd_path = "/Users/ottovandenbergh/Documents/BalPopo177-main_crook/" # /root/BalPopo177-main/
+cd_path = "/root/BalPopo177-main/"
 
 # -----------------------------------------
 # CONFIG (NO const)
