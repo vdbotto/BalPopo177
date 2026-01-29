@@ -44,8 +44,31 @@ end
 # -----------------------------------------
 # MAIL SENDER (uses local `mail`)
 # -----------------------------------------
-function send_mail(; from::String, to::String, subject::String, body::String)
-    run(pipeline(`mail -a "From: $from" -s $subject $to`, stdin = IOBuffer(body)))
+# Replace your send_mail with this:
+function send_mail(; from::AbstractString, to::AbstractString, subject::AbstractString, body::AbstractString)
+    if Sys.isapple()
+        # macOS: you said you won't actually send from here; keep simple for tests
+        run(pipeline(`mail -s $subject $to`, stdin = IOBuffer(body)))
+        return
+    end
+
+    # Build minimal RFC message with headers
+    # Normalize subject dash to avoid header encoding quirks
+    safe_subject = replace(String(subject), '—' => '-')
+    msg = """
+From: $(from)
+To: $(to)
+Subject: $(safe_subject)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+$(body)
+"""
+
+    # Use Postfix's sendmail: -f sets envelope sender, -t reads headers, -v prints SMTP dialogue
+    cmd = `sendmail -f $from -t -v`
+    run(pipeline(cmd; stdin = IOBuffer(msg)))
 end
 
 # -----------------------------------------
