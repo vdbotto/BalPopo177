@@ -285,7 +285,7 @@ function layout(title, content; background_css = "")
         <nav class="nav-links">
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
-          <a href="/Registration">Registration <span class="last-chance">Last chance!</span></a>
+          <a href="/Registration">Registration</a>
           <a href="/theevent">The Event</a>
           <a href="/ourstory">Our Story</a>
         </nav>
@@ -295,7 +295,7 @@ function layout(title, content; background_css = "")
         <nav class="mobile-menu">
           <a href="/">Home</a>
           <a href="/sponsors">Sponsors</a>
-          <a href="/Registration">Registration <span class="last-chance">Last chance!</span></a>
+          <a href="/Registration">Registration</a>
           <a href="/theevent">The Event</a>
           <a href="/ourstory">Our Story</a>
         </nav>
@@ -726,6 +726,7 @@ route("/Registration", method = POST) do
   end
 end
 
+#=
 route("/Registration", method = GET) do
   Captcha = logo_base64_data(cd_path*"BalPopo/static/Captcha.jpg")
   content = """
@@ -1096,8 +1097,9 @@ route("/Registration", method = GET) do
   """
   layout("Registration", content)
 end
+=#
 
-#= AFTER 5 FEB
+# AFTER 5 FEB
 route("/Registration", method = GET) do
     content = """
     <style>
@@ -1192,7 +1194,7 @@ route("/Registration", method = GET) do
 
     layout("Registrations Closed", content)
 end
-=#
+
 
 route("/crook") do
     img_shuffle = logo_base64_data(cd_path*"BalPopo/static/Shuffle.jpg")
