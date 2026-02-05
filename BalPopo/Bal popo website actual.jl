@@ -726,8 +726,8 @@ route("/Registration", method = POST) do
   end
 end
 
-#=
-route("/Registration", method = GET) do
+
+route("/registration_enkel_voor_vic", method = GET) do
   Captcha = logo_base64_data(cd_path*"BalPopo/static/Captcha.jpg")
   content = """
     <style>
@@ -1097,7 +1097,7 @@ route("/Registration", method = GET) do
   """
   layout("Registration", content)
 end
-=#
+
 
 # AFTER 5 FEB
 route("/Registration", method = GET) do
