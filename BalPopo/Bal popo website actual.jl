@@ -727,7 +727,7 @@ route("/Registration", method = POST) do
 end
 
 
-route("/registration_special", method = GET) do
+route("/registration_enkel_voor_vic", method = GET) do
   Captcha = logo_base64_data(cd_path*"BalPopo/static/Captcha.jpg")
   content = """
     <style>
@@ -2591,8 +2591,139 @@ function save_seating_pref(raw::AbstractString, pref::AbstractString; firstName:
     return true
 end
 
+## Voor de wacht ID shit
 
+ID_ACCESS_FILE = cd_path * "id_access.csv"
 
+function ensure_id_access_file!()
+    mkpath(dirname(ID_ACCESS_FILE))
+
+    if !isfile(ID_ACCESS_FILE)
+        df = DataFrame(
+            FirstName   = Vector{String}(),
+            LastName    = Vector{String}(),
+            Nationality = Vector{String}(),
+            Number      = Vector{String}(),
+            Timestamp   = Vector{String}(),
+            Raw         = Vector{String}()
+        )
+
+        CSV.write(ID_ACCESS_FILE, df; writeheader=true)
+    end
+end
+
+ensure_id_access_file!()
+
+function get_id_details(raw::AbstractString)
+    """Returns Dict with ID details if found, otherwise empty Dict"""
+    try
+        if isfile(ID_ACCESS_FILE)
+            df = CSV.read(ID_ACCESS_FILE, DataFrame)
+            idx = findfirst(x -> !ismissing(x) && String(x) == String(raw), df[!, "Raw"])
+            if idx !== nothing
+                return Dict(
+                    :first => string(df[idx, "FirstName"]),
+                    :last => string(df[idx, "LastName"]),
+                    :nat => string(df[idx, "Nationality"]),
+                    :num => string(df[idx, "Number"]),
+                    :timestamp => string(df[idx, "Timestamp"])
+                )
+            end
+        end
+    catch
+        # ignore errors
+    end
+    return Dict()
+end
+
+using HTTP: escapeuri # crook shit
+
+route("/registration/confirmation/:raw/seating", method = POST) do
+    raw = params(:raw) |> String |> strip
+    pref = try
+        String(params(:seatingPreference)) |> strip
+    catch
+        ""
+    end
+
+    # Resolve first/last name from registrations CSV with robust header detection
+    firstName = ""
+    lastName  = ""
+    try
+        if isfile(CSV_FILE)
+            df = CSV.read(CSV_FILE, DataFrame)
+
+            # Helper to grab an existing column name from a list of aliases
+            find_col = (aliases::Vector{String}) -> begin
+                for a in aliases
+                    if a in names(df)
+                        return a
+                    end
+                end
+                return nothing
+            end
+
+            code_col = find_col(["Raw entry code", "uniqueCode"])
+            fn_col   = find_col(["First name","First Name","firstName","firstname"])
+            ln_col   = find_col(["Last name","Last Name","lastName","lastname"])
+
+            if code_col !== nothing
+                idx = findfirst(x -> !ismissing(x) && String(x) == raw, df[!, code_col])
+                if idx !== nothing
+                    if fn_col !== nothing
+                        v = df[idx, fn_col]
+                        firstName = v === missing ? "" : String(v)
+                    end
+                    if ln_col !== nothing
+                        v = df[idx, ln_col]
+                        lastName = v === missing ? "" : String(v)
+                    end
+                end
+            end
+        end
+    catch
+        # ignore; leave names empty if anything goes wrong
+    end
+
+    if !isempty(pref)
+        _ = save_seating_pref(raw, pref; firstName=firstName, lastName=lastName)
+    end
+
+    redirect("/registration/confirmation/$(escapeuri(raw))")
+end
+
+route("/registration/confirmation/:raw/idaccess", method = POST) do
+    raw = params(:raw) |> String |> strip
+    timestamp = string(Dates.now())
+
+    ensure_id_access_file!()
+
+    # Extract form parameters safely using Symbol-based access
+    plus_first = try; String(params(:plus_first)) |> strip; catch; ""; end
+    plus_last  = try; String(params(:plus_last)) |> strip; catch; ""; end
+    plus_nat   = try; String(params(:plus_nat)) |> strip; catch; ""; end
+    plus_num   = try; String(params(:plus_num)) |> strip; catch; ""; end
+
+    df = CSV.read(ID_ACCESS_FILE, DataFrame)
+
+    # Only add row if at least one field is filled
+    has_data = any(x -> !isempty(x), (plus_first, plus_last, plus_nat, plus_num))
+    
+    if has_data
+        new_row = DataFrame(
+            FirstName   = [plus_first],
+            LastName    = [plus_last],
+            Nationality = [plus_nat],
+            Number      = [plus_num],
+            Timestamp   = [timestamp],
+            Raw         = [raw]
+        )
+        df = vcat(df, new_row)
+    end
+    
+    CSV.write(ID_ACCESS_FILE, df)
+    redirect("/registration/confirmation/$(escapeuri(raw))")
+end
 
 route("/registration/confirmation/:raw", method = GET) do
     raw = params(:raw) |> String |> strip
@@ -2643,7 +2774,7 @@ route("/registration/confirmation/:raw", method = GET) do
     show_plus = !isempty(plus_lastname) && !(plus_flag in ("no", "no thank you"))
 
     tombola    = safeval("Number of tombola tickets")
-    dietary    = safeval("Dietary preferences/restrictions")
+    dietary    = safeval("DietaryPref")
     bus_return = safeval("Bus return time")
     bus_service_raw = lowercase(strip(safeval("Bus")))
     show_bus = !isempty(bus_return) && !(lowercase(bus_return) in ("-", "n/a", "select"))
@@ -2793,6 +2924,74 @@ route("/registration/confirmation/:raw", method = GET) do
       </table>
     </div>
     """
+
+
+    id_form_html = ""
+    if show_plus
+        id_details = get_id_details(raw)
+        if isempty(id_details)
+            # No ID details submitted yet - show form
+            id_form_html = """
+            <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
+              <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">
+                Plus One ID / Passport details (optional)
+              </h3>
+              <p style="margin-top:8px; color:#ccc; font-size:0.95rem;">
+                If you'd like your plus one to be granted RMA access before taking the bus, please submit their ID or passport details here. The corresponding identity document must be presented at the guard's post on arrival.
+                <br> ⚠️ Deadline 11th February 12h. You can submit this form once. 
+              </p>
+
+              <form method="post"
+                    action="/registration/confirmation/$(escapeuri(raw))/idaccess"
+                    enctype="application/x-www-form-urlencoded"
+                    style="margin-top:10px;">
+
+                <input name="plus_first" placeholder="First name as on ID" maxlength="40"
+                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
+
+                <input name="plus_last" placeholder="Last name as on ID" maxlength="40"
+                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
+
+                <input name="plus_nat" placeholder="Nationality" maxlength="40"
+                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
+
+                <input name="plus_num" placeholder="ID / Passport number" maxlength="40"
+                  style="width:100%; margin-bottom:20px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
+
+                <button type="submit"
+                  style="padding:10px 18px; border:2px solid #FFA500; background:transparent; color:#FFA500; font-weight:600; border-radius:8px; cursor:pointer;">
+                  Save Plus One ID details
+                </button>
+
+              </form>
+            </div>
+            """
+        else
+            # ID details already submitted - show them
+            id_first = get(id_details, :first, "")
+            id_last = get(id_details, :last, "")
+            id_nat = get(id_details, :nat, "")
+            id_num = get(id_details, :num, "")
+            id_form_html = """
+            <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
+              <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">
+                Plus One ID / Passport details (submitted)
+              </h3>
+              <p style="margin-top:8px; color:#ccc; font-size:0.95rem;">
+                These details were submitted earlier — please present the corresponding identity document at the guard's post when you arrive.
+              </p>
+              <table class="details-table">
+                <tr class='details-row'><td class='details-label'>First name</td><td class='details-value'>$id_first</td></tr>
+                <tr class='details-row'><td class='details-label'>Last name</td><td class='details-value'>$id_last</td></tr>
+                <tr class='details-row'><td class='details-label'>Nationality</td><td class='details-value'>$id_nat</td></tr>
+                <tr class='details-row'><td class='details-label'>ID / Passport number</td><td class='details-value'>$id_num</td></tr>
+              </table>
+            </div>
+            """
+        end
+    end
+
+      
 
     # ==========================
     # 7 — FULL PAGE CONTENT
@@ -2944,6 +3143,10 @@ route("/registration/confirmation/:raw", method = GET) do
       """ : ""
     )
 
+    $id_form_html
+
+
+
 
         <div style="margin-top:6px; font-size:0.9rem; color:#ccc;">
           Something wrong or not working? Contact us.
@@ -2955,75 +3158,6 @@ route("/registration/confirmation/:raw", method = GET) do
     return layout("Registration Confirmation", content)
 end
 
-using HTTP: escapeuri # crook shit
-
-route("/registration/confirmation/:raw/seating", method = POST) do
-    raw = params(:raw) |> String |> strip
-    pref = try
-        String(params(:seatingPreference)) |> strip
-    catch
-        ""
-    end
-
-    # Resolve first/last name from registrations CSV with robust header detection
-    firstName = ""
-    lastName  = ""
-    try
-        if isfile(CSV_FILE)
-            df = CSV.read(CSV_FILE, DataFrame)
-
-            # Helper to grab an existing column name from a list of aliases
-            find_col = (aliases::Vector{String}) -> begin
-                for a in aliases
-                    if a in names(df)
-                        return a
-                    end
-                end
-                return nothing
-            end
-
-            code_col = find_col(["Raw entry code", "uniqueCode"])
-            fn_col   = find_col(["First name","First Name","firstName","firstname"])
-            ln_col   = find_col(["Last name","Last Name","lastName","lastname"])
-
-            if code_col !== nothing
-                idx = findfirst(x -> !ismissing(x) && String(x) == raw, df[!, code_col])
-                if idx !== nothing
-                    if fn_col !== nothing
-                        v = df[idx, fn_col]
-                        firstName = v === missing ? "" : String(v)
-                    end
-                    if ln_col !== nothing
-                        v = df[idx, ln_col]
-                        lastName = v === missing ? "" : String(v)
-                    end
-                end
-            end
-        end
-    catch
-        # ignore; leave names empty if anything goes wrong
-    end
-
-    if !isempty(pref)
-        _ = save_seating_pref(raw, pref; firstName=firstName, lastName=lastName)
-    end
-
-    redirect("/registration/confirmation/$(escapeuri(raw))")
-end
 
 Genie.config.server_host = "0.0.0.0"   # listen on all interfaces
 Genie.config.server_port = 8000        # your chosen port
-
-
-#= Crookerijen lijst: 
-1: /crook pagina
-2: We CaRe about your Ball(z)
-3: Complaints
-4: Our Story
-5: Full Name e.g. Ne Crook
-6: Phone Number
-7: Captcha
-
-
-
-=#
