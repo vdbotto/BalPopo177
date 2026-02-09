@@ -36,6 +36,8 @@ Dear $(who),
 Please find your registration confirmation and entry ticket at:
 $(BASE_URL)/$(rawcode)
 
+If you have received this mail before, please not that we have added the possibility to grant access to a "Plus one" to enter the RMA i.o.t. change before the event.
+
 Kind regards,
 Ball Popo 177 Team
 """
