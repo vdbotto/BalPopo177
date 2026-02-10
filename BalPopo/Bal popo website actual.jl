@@ -2535,6 +2535,257 @@ route("/admin/download_registrations", method = GET) do
 end
 
 
+route("/admin", method = GET) do
+    content = """
+    <style>
+    .admin-dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    .admin-card {
+        background: rgba(255,255,255,0.1);
+        border: 2px solid #FFA500;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        backdrop-filter: blur(6px);
+    }
+    .admin-card h3 {
+        margin-top: 0;
+        color: #FFA500;
+        font-size: 1.3rem;
+    }
+    .admin-card p {
+        color: #ccc;
+        margin: 10px 0 20px;
+    }
+    .admin-card a {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #FFA500;
+        color: #111;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    .admin-card a:hover {
+        background-color: #ff8c00;
+    }
+    </style>
+
+    <h1 style="color:#FFA500;text-align:center;">Admin Dashboard</h1>
+
+    <div class="admin-dashboard">
+        <div class="admin-card">
+            <h3>📋 Registrations</h3>
+            <p>View and download all event registrations</p>
+            <a href="/admin/registrations">Access</a>
+        </div>
+
+        <div class="admin-card">
+            <h3>🪑 Seating Preferences</h3>
+            <p>View and download seating preferences</p>
+            <a href="/admin/seats">Access</a>
+        </div>
+
+        <div class="admin-card">
+            <h3>🆔 ID Details</h3>
+            <p>View and download Plus One ID information</p>
+            <a href="/admin/ID">Access</a>
+        </div>
+
+        <div class="admin-card">
+            <h3>📱 QR Scanner</h3>
+            <p>Scan entry QR codes at the door</p>
+            <a href="/admin/scan">Access</a>
+        </div>
+    </div>
+    """
+    layout("Admin Dashboard", content)
+end
+
+
+route("/admin/seats", method = GET) do
+    content = """
+    ## Admin: View Seating Preferences
+
+    Enter the admin password to view and download all seating preferences.
+
+    <form method="POST">
+        <input type="password" name="password" placeholder="Admin password" required>
+        <button type="submit">Access</button>
+    </form>
+    """
+    layout("Admin Seating Preferences", content)
+end
+
+
+route("/admin/seats", method = POST) do
+    data = params()
+    provided_pw = get(data, :password, "")
+    correct_pw = get(ENV, "ADMIN_KEY", "")
+
+    if provided_pw != correct_pw
+        return layout("Forbidden", "<h3>Invalid password.</h3>")
+    end
+
+    # Read CSV
+    table_html = ""
+    if isfile(SEATING_FILE)
+        df = CSV.read(SEATING_FILE, DataFrame)
+        # Build HTML table
+        table_html = "<table border='1' style='border-collapse:collapse;width:100%;'>"
+        table_html *= "<tr>" * join(["<th>$(escape_html(col))</th>" for col in names(df)]) * "</tr>"
+        for row in eachrow(df)
+            table_html *= "<tr>" * join(["<td>$(escape_html(string(row[col])))</td>" for col in names(df)]) * "</tr>"
+        end
+        table_html *= "</table>"
+    else
+        table_html = "<p>No seating preferences found.</p>"
+    end
+
+    buttons_html = """
+    <style>
+    .admin-btn {
+        display: inline-block;
+        padding: 14px 24px;
+        margin: 12px 8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #ff6600;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background-color: #e65c00;
+    }
+    </style>
+
+    <div style="margin-top:20px;">
+        <a href="/admin/download_seats" class="admin-btn">Download CSV</a>
+    </div>
+    """
+
+    content = """
+    <h2>Seating Preferences</h2>
+    $table_html
+    $buttons_html
+    """
+    layout("Admin Seating Preferences", content)
+end
+
+
+route("/admin/download_seats", method = GET) do
+    if !isfile(SEATING_FILE)
+        return layout("Error", "<p>CSV file not found.</p>")
+    end
+
+    csv_data = read(SEATING_FILE, String)
+
+    return HTTP.Response(
+        200,
+        ["Content-Type" => "text/csv",
+         "Content-Disposition" => "attachment; filename=\"seating_preferences.csv\""],
+        csv_data
+    )
+end
+
+
+route("/admin/ID", method = GET) do
+    content = """
+    ## Admin: View ID Details
+
+    Enter the admin password to view and download all Plus One ID details.
+
+    <form method="POST">
+        <input type="password" name="password" placeholder="Admin password" required>
+        <button type="submit">Access</button>
+    </form>
+    """
+    layout("Admin ID Details", content)
+end
+
+
+route("/admin/ID", method = POST) do
+    data = params()
+    provided_pw = get(data, :password, "")
+    correct_pw = get(ENV, "ADMIN_KEY", "")
+
+    if provided_pw != correct_pw
+        return layout("Forbidden", "<h3>Invalid password.</h3>")
+    end
+
+    # Read CSV
+    table_html = ""
+    if isfile(ID_ACCESS_FILE)
+        df = CSV.read(ID_ACCESS_FILE, DataFrame)
+        # Build HTML table
+        table_html = "<table border='1' style='border-collapse:collapse;width:100%;'>"
+        table_html *= "<tr>" * join(["<th>$(escape_html(col))</th>" for col in names(df)]) * "</tr>"
+        for row in eachrow(df)
+            table_html *= "<tr>" * join(["<td>$(escape_html(string(row[col])))</td>" for col in names(df)]) * "</tr>"
+        end
+        table_html *= "</table>"
+    else
+        table_html = "<p>No ID details found.</p>"
+    end
+
+    buttons_html = """
+    <style>
+    .admin-btn {
+        display: inline-block;
+        padding: 14px 24px;
+        margin: 12px 8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #ff6600;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background-color: #e65c00;
+    }
+    </style>
+
+    <div style="margin-top:20px;">
+        <a href="/admin/download_id" class="admin-btn">Download CSV</a>
+    </div>
+    """
+
+    content = """
+    <h2>ID Details</h2>
+    $table_html
+    $buttons_html
+    """
+    layout("Admin ID Details", content)
+end
+
+
+route("/admin/download_id", method = GET) do
+    if !isfile(ID_ACCESS_FILE)
+        return layout("Error", "<p>CSV file not found.</p>")
+    end
+
+    csv_data = read(ID_ACCESS_FILE, String)
+
+    return HTTP.Response(
+        200,
+        ["Content-Type" => "text/csv",
+         "Content-Disposition" => "attachment; filename=\"id_access.csv\""],
+        csv_data
+    )
+end
+
+
 const SEATING_FILE = cd_path * "BalPopo/seating_preferences.csv"
 
 
