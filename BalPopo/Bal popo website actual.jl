@@ -3235,7 +3235,7 @@ route("/registration/confirmation/:raw", method = GET) do
                 <tr class='details-row'><td class='details-label'>First name</td><td class='details-value'>$id_first</td></tr>
                 <tr class='details-row'><td class='details-label'>Last name</td><td class='details-value'>$id_last</td></tr>
                 <tr class='details-row'><td class='details-label'>Nationality</td><td class='details-value'>$id_nat</td></tr>
-                <tr class='details-row'><td class='details-label'>ID / Passport number</td><td class='details-value'>$id_num</td></tr>
+                <tr class='details-row'><td class='details-label'>ID card (not RRN/NN) / Passport number </td><td class='details-value'>$id_num</td></tr>
               </table>
             </div>
             """
