@@ -3206,7 +3206,7 @@ route("/registration/confirmation/:raw", method = GET) do
                 <input name="plus_nat" placeholder="Nationality" maxlength="40"
                   style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
 
-                <input name="plus_num" placeholder="ID / Passport number" maxlength="40"
+                <input name="plus_num" placeholder="ID card / Passport number (⚠️ not Rijkregisternummer/Numéro Nationale)" maxlength="40"
                   style="width:100%; margin-bottom:20px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
 
                 <button type="submit"
@@ -3235,7 +3235,7 @@ route("/registration/confirmation/:raw", method = GET) do
                 <tr class='details-row'><td class='details-label'>First name</td><td class='details-value'>$id_first</td></tr>
                 <tr class='details-row'><td class='details-label'>Last name</td><td class='details-value'>$id_last</td></tr>
                 <tr class='details-row'><td class='details-label'>Nationality</td><td class='details-value'>$id_nat</td></tr>
-                <tr class='details-row'><td class='details-label'>ID card (⚠️ not Rijkregisternummer/Numéro Nationale) / Passport number </td><td class='details-value'>$id_num</td></tr>
+                <tr class='details-row'><td class='details-label'>ID card / Passport number </td><td class='details-value'>$id_num</td></tr>
               </table>
             </div>
             """
