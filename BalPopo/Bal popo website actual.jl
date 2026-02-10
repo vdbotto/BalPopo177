@@ -727,7 +727,7 @@ route("/Registration", method = POST) do
 end
 
 
-route("/registration_enkel_voor_vic", method = GET) do
+route("/registration_179", method = GET) do
   Captcha = logo_base64_data(cd_path*"BalPopo/static/Captcha.jpg")
   content = """
     <style>
