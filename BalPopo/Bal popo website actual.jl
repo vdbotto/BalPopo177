@@ -3180,44 +3180,8 @@ route("/registration/confirmation/:raw", method = GET) do
     id_form_html = ""
     if show_plus
         id_details = get_id_details(raw)
-        if isempty(id_details)
-            # No ID details submitted yet - show form
-            id_form_html = """
-            <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
-              <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">
-                Plus One ID / Passport details (optional)
-              </h3>
-              <p style="margin-top:8px; color:#ccc; font-size:0.95rem;">
-                If you'd like your plus one to be granted RMA access before taking the bus, please submit their ID or passport details here. The corresponding identity document must be presented at the guard's post on arrival.
-                <br> ⚠️ Deadline 11th February 12h. You can submit this form once. 
-              </p>
-
-              <form method="post"
-                    action="/registration/confirmation/$(escapeuri(raw))/idaccess"
-                    enctype="application/x-www-form-urlencoded"
-                    style="margin-top:10px;">
-
-                <input name="plus_first" placeholder="First name as on ID" maxlength="40"
-                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
-
-                <input name="plus_last" placeholder="Last name as on ID" maxlength="40"
-                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
-
-                <input name="plus_nat" placeholder="Nationality" maxlength="40"
-                  style="width:100%; margin-bottom:10px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
-
-                <input name="plus_num" placeholder="ID card / Passport number (⚠️ not Rijkregisternummer/Numéro Nationale)" maxlength="40"
-                  style="width:100%; margin-bottom:20px; background:transparent; border:none; border-bottom:1px solid #555; color:#fff;">
-
-                <button type="submit"
-                  style="padding:10px 18px; border:2px solid #FFA500; background:transparent; color:#FFA500; font-weight:600; border-radius:8px; cursor:pointer;">
-                  Save Plus One ID details
-                </button>
-
-              </form>
-            </div>
-            """
-        else
+        # Form is closed - only show submitted details if they exist
+        if !isempty(id_details)
             # ID details already submitted - show them
             id_first = get(id_details, :first, "")
             id_last = get(id_details, :last, "")
@@ -3237,6 +3201,18 @@ route("/registration/confirmation/:raw", method = GET) do
                 <tr class='details-row'><td class='details-label'>Nationality</td><td class='details-value'>$id_nat</td></tr>
                 <tr class='details-row'><td class='details-label'>ID card / Passport number </td><td class='details-value'>$id_num</td></tr>
               </table>
+            </div>
+            """
+        else
+            # Form is closed - display closure message
+            id_form_html = """
+            <div class="info-box" style="backdrop-filter: blur(6px); margin-top:22px;">
+              <h3 style="margin-top:0; color:#fff; font-size:1.2rem;">
+                Plus One ID / Passport details
+              </h3>
+              <p style="margin-top:8px; color:#ccc; font-size:0.95rem;">
+                The form for submitting Plus One ID / Passport details is now closed.
+              </p>
             </div>
             """
         end
