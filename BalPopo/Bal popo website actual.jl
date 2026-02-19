@@ -1,4 +1,5 @@
 # Functie om logo of achtergrondafbeelding als base64 in te laden
+using Random
 function logo_base64_data(path)
   img = load(path)
   buf = IOBuffer()
@@ -2234,6 +2235,36 @@ route("/photos_hugoniot") do
   allowed_exts = [".jpg", ".jpeg", ".png", ".webp", ".gif"]
   files = filter(f-> any(ext->endswith(lowercase(f), ext), allowed_exts), readdir(dir))
   sort!(files)
+
+  # Persist a one-time randomized ordering so everyone sees the same layout.
+  order_file = cd_path*"BalPopo/photos/.order"
+  if isfile(order_file)
+    ordered = filter(!isempty, readlines(order_file))
+    # Keep only files that still exist
+    ordered = [f for f in ordered if f in files]
+    # Append any new files (added since the order was created)
+    for f in files
+      if !(f in ordered)
+        push!(ordered, f)
+      end
+    end
+    files = ordered
+    # persist any changes (e.g., new files appended)
+    open(order_file, "w") do io
+      for f in files
+        println(io, f)
+      end
+    end
+  else
+    shuffled = copy(files)
+    shuffle!(shuffled)
+    open(order_file, "w") do io
+      for f in shuffled
+        println(io, f)
+      end
+    end
+    files = shuffled
+  end
   esc = f-> replace(replace(f, " " => "%20"), "#" => "%23")
   imgs_html = join([
     "<div class=\"photo\">" *
@@ -2249,17 +2280,21 @@ route("/photos_hugoniot") do
     .photos-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
     .photos-top .btn { background:#FFA500; color:#111; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:700; }
 
-    .masonry { column-gap:12px; column-count:4; }
-    .photo { break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom:12px; position:relative; }
-    .photo-inner { position:relative; overflow:hidden; border-radius:10px; }
-    .photo img { width:100%; height:auto; display:block; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.35); transition:transform .2s ease; }
+     /* Masonry layout: visually like the original column layout but use JS to
+       position items so images can be fetched in DOM order (top-down) while
+       preserving the staggered column appearance. */
+     .masonry { position: relative; }
+     .photo { position: absolute; margin: 0; }
+     .photo-inner { position: relative; overflow: hidden; border-radius: 10px; }
+     .photo img { width: 100%; height: auto; display: block; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); transition: transform .2s ease; }
     .photo:hover img { transform:scale(1.02); }
     .download-btn { position:absolute; right:8px; bottom:8px; background:#FFA500; color:#111; padding:6px 8px; border-radius:6px; text-decoration:none; font-weight:800; font-size:0.9rem; opacity:0; transition:opacity .12s ease, transform .12s ease; }
     .photo:hover .download-btn { opacity:1; transform:translateY(-2px); }
 
-    @media (max-width: 1100px) { .masonry { column-count:3 } }
-    @media (max-width: 800px)  { .masonry { column-count:2 } }
-    @media (max-width: 480px)  { .masonry { column-count:1 } }
+    /* Responsive column counts used by the JS layout. */
+    @media (max-width: 1100px) { .masonry { --cols: 3; } }
+    @media (max-width: 800px)  { .masonry { --cols: 2; } }
+    @media (max-width: 480px)  { .masonry { --cols: 1; } }
   </style>
 
   <div class="content">
@@ -2279,6 +2314,65 @@ route("/photos_hugoniot") do
       e.preventDefault();
       alert('Download-all link placeholder — replace with your archive URL.');
     });
+  </script>
+
+  <script>
+    (function(){
+      const container = document.querySelector('.masonry');
+      if(!container) return;
+
+      function colsForWidth(w){
+        if(w<=480) return 1;
+        if(w<=800) return 2;
+        if(w<=1100) return 3;
+        return 4;
+      }
+
+      function layout(){
+        const gap = 12;
+        const cols = parseInt(getComputedStyle(container).getPropertyValue('--cols')) || colsForWidth(container.clientWidth);
+        const colWidth = Math.floor((container.clientWidth - gap*(cols-1))/cols);
+        const columnHeights = new Array(cols).fill(0);
+        const items = Array.from(container.querySelectorAll('.photo'));
+
+        items.forEach(item => {
+          item.style.position = 'absolute';
+          item.style.width = colWidth + 'px';
+          item.style.margin = '0';
+        });
+
+        items.forEach(item => {
+          const inner = item.querySelector('.photo-inner') || item;
+          const h = inner.offsetHeight;
+          // place in shortest column (masonry algorithm)
+          let col = 0;
+          for(let i=1;i<cols;i++) if(columnHeights[i] < columnHeights[col]) col = i;
+          const x = col * (colWidth + gap);
+          const y = columnHeights[col];
+          item.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+          columnHeights[col] += h + gap;
+        });
+
+        const maxH = Math.max(...columnHeights);
+        container.style.height = maxH + 'px';
+      }
+
+      function waitImagesThenLayout(){
+        const imgs = Array.from(container.querySelectorAll('img'));
+        if(imgs.length === 0){ layout(); return; }
+        let loaded = 0;
+        imgs.forEach(img => {
+          if(img.complete) { loaded++; }
+          else img.addEventListener('load', () => { loaded++; layout(); });
+          img.addEventListener('error', () => { loaded++; layout(); });
+        });
+        // initial layout attempt (allows progressive placements)
+        layout();
+      }
+
+      window.addEventListener('load', waitImagesThenLayout);
+      window.addEventListener('resize', () => { clearTimeout(window._masonryTimer); window._masonryTimer = setTimeout(layout, 120); });
+    })();
   </script>
 
   """
