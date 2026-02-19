@@ -2402,7 +2402,7 @@ route("/photos_hugoniot") do
   <script>
     document.getElementById('downloadAll').addEventListener('click', function(e){
       e.preventDefault();
-      alert('Download-all link placeholder — replace with your archive URL.');
+      window.location.href = 'https://fedsender.belnet.be/download.php?token=d1a493c6-16e1-4376-9491-1cba7a4d84b0&files_ids=2125893';
     });
   </script>
   """
