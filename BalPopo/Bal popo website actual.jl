@@ -2392,8 +2392,11 @@ route("/photos") do
 
   <div class="content">
     <div class="photos-top">
-      <h1 style="color:#FFA500; margin:0;">Photos</h1>
-      <a id="downloadAll" class="btn" href="#">Download all photos</a>
+      <div style="display:flex;flex-direction:column;">
+        <h1 style="color:#FFA500; margin:0;">Photos</h1>
+        <p style="margin:6px 0 0 0; color:#ddd; font-size:0.95rem;">Enjoy the photos from the event! You can download in low quality by clicking the picture or in full quality by clicking "Download all photos" .</p>
+      </div>
+      <a id="downloadAll" class="btn" href="#">Download all photos (HD)</a>
     </div>
 
     $(columns_html)
