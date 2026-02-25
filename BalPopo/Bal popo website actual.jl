@@ -2230,7 +2230,7 @@ route("/ourstory") do
   layout("Our Story", content)
 end
 
-route("/photos_hugoniot") do
+route("/photos") do
   dir = cd_path*"BalPopo/photos"
   allowed_exts = [".jpg", ".jpeg", ".png", ".webp", ".gif"]
 
